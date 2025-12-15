@@ -1,0 +1,117 @@
+.photographers {
+    background: var(--color-dark-secondary);
+}
+
+.photographers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.photographer-card {
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: all var(--transition-normal);
+    opacity: 0;
+}
+
+.photographer-avatar {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+}
+
+.avatar-icon {
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-sunset);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    transition: all var(--transition-normal);
+}
+
+.photographer-card:hover .avatar-icon {
+    transform: scale(1.1);
+    border-color: var(--color-sunset-orange);
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.4);
+}
+
+.featured-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 32px;
+    height: 32px;
+    background: var(--gradient-sunset);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+    animation: float 3s ease-in-out infinite;
+}
+
+.photographer-info {
+    margin-bottom: 1.5rem;
+}
+
+.photographer-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-white);
+}
+
+.photographer-specialty {
+    font-size: 0.95rem;
+    color: var(--color-light-gray);
+    margin-bottom: 1rem;
+}
+
+.photographer-stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    color: var(--color-gray);
+    font-size: 0.9rem;
+}
+
+.photographer-stats svg {
+    color: var(--color-sunset-orange);
+}
+
+.btn-full {
+    width: 100%;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .photographers-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .photographer-card {
+        padding: 1.5rem;
+    }
+
+    .photographer-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .avatar-icon {
+        font-size: 2.5rem;
+    }
+}
