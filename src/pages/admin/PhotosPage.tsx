@@ -1,216 +1,111 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { photoApi, categoryApi, type Photo, type PhotoStats, type Category, handleApiError } from '../../services/api';
 import '../dashboard/Dashboard.css';
 import './AdminDashboard.css';
 import './PhotosPage.css';
 
-interface Photo {
-    id: number;
-    title: string;
-    description?: string;
-    imageUrl: string;
-    thumbnailUrl: string;
-    watermarkedUrl?: string;
-    photographer: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        username: string;
-    };
-    fileSize: number;
-    width: number;
-    height: number;
-    format: string;
-    basePrice: number;
-    commercialPrice?: number;
-    editorialPrice?: number;
-    extendedPrice?: number;
-    isApproved: boolean;
-    isFeatured: boolean;
-    isActive: boolean;
-    viewCount: number;
-    downloadCount: number;
-    likeCount: number;
-    location?: string;
-    cameraModel?: string;
-    lens?: string;
-    focalLength?: string;
-    aperture?: string;
-    shutterSpeed?: string;
-    iso?: string;
-    captureDate?: string;
-    createdAt: string;
-    tags: string[];
-    categories: string[];
-}
-
 const PhotosPage = () => {
+    // State management
+    const [photos, setPhotos] = useState<Photo[]>([]);
+    const [stats, setStats] = useState<PhotoStats>({
+        totalPhotos: 0,
+        pendingApproval: 0,
+        approved: 0,
+        rejected: 0,
+        featured: 0,
+        totalViews: 0,
+        totalDownloads: 0
+    });
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+    // Filter and search state
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+
+    // Modal state
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showApprovalModal, setShowApprovalModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    // Mock data - replace with API calls
-    const mockPhotos: Photo[] = [
-        {
-            id: 1,
-            title: 'Sri Lankan Leopard in Yala',
-            description: 'A magnificent leopard spotted in Yala National Park during early morning safari',
-            imageUrl: '/api/placeholder/1920/1080',
-            thumbnailUrl: '/api/placeholder/400/300',
-            watermarkedUrl: '/api/placeholder/1920/1080',
-            photographer: {
-                id: 1,
-                firstName: 'John',
-                lastName: 'Doe',
-                username: 'johndoe'
-            },
-            fileSize: 5242880,
-            width: 1920,
-            height: 1080,
-            format: 'jpg',
-            basePrice: 50.00,
-            commercialPrice: 150.00,
-            editorialPrice: 100.00,
-            extendedPrice: 250.00,
-            isApproved: false,
-            isFeatured: false,
-            isActive: true,
-            viewCount: 245,
-            downloadCount: 12,
-            likeCount: 34,
-            location: 'Yala National Park, Sri Lanka',
-            cameraModel: 'Canon EOS R5',
-            lens: 'RF 100-500mm f/4.5-7.1L IS USM',
-            focalLength: '400mm',
-            aperture: 'f/5.6',
-            shutterSpeed: '1/1000',
-            iso: '800',
-            captureDate: '2024-11-30T08:30:00',
-            createdAt: '2024-12-01T10:00:00',
-            tags: ['leopard', 'wildlife', 'mammal', 'yala'],
-            categories: ['Wildlife', 'Mammals']
-        },
-        {
-            id: 2,
-            title: 'Asian Elephant Herd',
-            description: 'Family of elephants crossing the road in Udawalawe',
-            imageUrl: '/api/placeholder/1920/1080',
-            thumbnailUrl: '/api/placeholder/400/300',
-            photographer: {
-                id: 2,
-                firstName: 'Jane',
-                lastName: 'Smith',
-                username: 'janesmith'
-            },
-            fileSize: 6291456,
-            width: 2400,
-            height: 1600,
-            format: 'jpg',
-            basePrice: 45.00,
-            commercialPrice: 135.00,
-            isApproved: true,
-            isFeatured: true,
-            isActive: true,
-            viewCount: 892,
-            downloadCount: 45,
-            likeCount: 156,
-            location: 'Udawalawe National Park',
-            cameraModel: 'Sony A7R V',
-            createdAt: '2024-11-28T14:20:00',
-            tags: ['elephant', 'wildlife', 'mammal'],
-            categories: ['Wildlife', 'Mammals']
-        },
-        {
-            id: 3,
-            title: 'Blue Whale Breach',
-            description: 'Rare blue whale breaching off the coast of Mirissa',
-            imageUrl: '/api/placeholder/1920/1080',
-            thumbnailUrl: '/api/placeholder/400/300',
-            photographer: {
-                id: 3,
-                firstName: 'Mike',
-                lastName: 'Johnson',
-                username: 'mikejohnson'
-            },
-            fileSize: 7340032,
-            width: 3000,
-            height: 2000,
-            format: 'jpg',
-            basePrice: 75.00,
-            commercialPrice: 225.00,
-            editorialPrice: 150.00,
-            isApproved: true,
-            isFeatured: false,
-            isActive: true,
-            viewCount: 1523,
-            downloadCount: 67,
-            likeCount: 289,
-            location: 'Mirissa, Sri Lanka',
-            createdAt: '2024-11-25T09:15:00',
-            tags: ['whale', 'marine', 'ocean'],
-            categories: ['Wildlife', 'Marine Life']
-        },
-        {
-            id: 4,
-            title: 'Peacock Display',
-            description: 'Male peacock displaying vibrant plumage',
-            imageUrl: '/api/placeholder/1920/1080',
-            thumbnailUrl: '/api/placeholder/400/300',
-            photographer: {
-                id: 1,
-                firstName: 'John',
-                lastName: 'Doe',
-                username: 'johndoe'
-            },
-            fileSize: 4194304,
-            width: 1800,
-            height: 1200,
-            format: 'jpg',
-            basePrice: 35.00,
-            isApproved: false,
-            isFeatured: false,
-            isActive: true,
-            viewCount: 67,
-            downloadCount: 3,
-            likeCount: 12,
-            location: 'Sinharaja Forest Reserve',
-            createdAt: '2024-12-10T11:30:00',
-            tags: ['peacock', 'bird', 'colorful'],
-            categories: ['Wildlife', 'Birds']
+    // View and pagination state
+
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+    const pageSize = 20;
+
+    // Load data on mount and when filters change
+    useEffect(() => {
+        loadPhotos();
+        loadStats();
+    }, [currentPage, statusFilter, categoryFilter, searchTerm]);
+
+    // Load categories on mount
+    useEffect(() => {
+        loadCategories();
+    }, []);
+
+    const loadPhotos = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            let response;
+
+            // Apply filters
+            if (searchTerm) {
+                response = await photoApi.searchPhotos(searchTerm, currentPage, pageSize);
+            } else if (statusFilter === 'PENDING') {
+                response = await photoApi.getPendingApproval(currentPage, pageSize);
+            } else if (statusFilter === 'FEATURED') {
+                response = await photoApi.getFeaturedPhotos(currentPage, pageSize);
+            } else if (statusFilter === 'APPROVED') {
+                response = await photoApi.getApprovedAndActive(currentPage, pageSize);
+            } else if (categoryFilter !== 'ALL') {
+                const category = categories.find(c => c.name === categoryFilter);
+                if (category) {
+                    response = await photoApi.getPhotosByCategory(category.slug, currentPage, pageSize);
+                } else {
+                    response = await photoApi.getAllPhotos(currentPage, pageSize);
+                }
+            } else {
+                response = await photoApi.getAllPhotos(currentPage, pageSize);
+            }
+
+            setPhotos(response.content);
+            setTotalPages(response.totalPages);
+            setTotalElements(response.totalElements);
+        } catch (err) {
+            const apiError = handleApiError(err);
+            setError(apiError.message);
+            console.error('Failed to load photos:', apiError);
+        } finally {
+            setLoading(false);
         }
-    ];
-
-    const stats = {
-        totalPhotos: 12456,
-        pendingApproval: 23,
-        approved: 11234,
-        rejected: 189,
-        featured: 156,
-        totalViews: 1234567,
-        totalDownloads: 45678
     };
 
-    const filteredPhotos = mockPhotos.filter(photo => {
-        const matchesSearch = searchTerm === '' ||
-            photo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            photo.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            photo.photographer.username.toLowerCase().includes(searchTerm.toLowerCase());
+    const loadStats = async () => {
+        try {
+            const statsData = await photoApi.getPhotoStats();
+            setStats(statsData);
+        } catch (err) {
+            console.error('Failed to load stats:', err);
+        }
+    };
 
-        const matchesStatus = statusFilter === 'ALL' ||
-            (statusFilter === 'PENDING' && !photo.isApproved) ||
-            (statusFilter === 'APPROVED' && photo.isApproved) ||
-            (statusFilter === 'FEATURED' && photo.isFeatured) ||
-            (statusFilter === 'INACTIVE' && !photo.isActive);
-
-        const matchesCategory = categoryFilter === 'ALL' ||
-            photo.categories.includes(categoryFilter);
-
-        return matchesSearch && matchesStatus && matchesCategory;
-    });
+    const loadCategories = async () => {
+        try {
+            const categoriesData = await categoryApi.getAllCategories();
+            setCategories(categoriesData);
+        } catch (err) {
+            console.error('Failed to load categories:', err);
+        }
+    };
 
     const formatFileSize = (bytes: number) => {
         if (bytes < 1024) return bytes + ' B';
@@ -231,9 +126,18 @@ const PhotosPage = () => {
         setShowDetailsModal(true);
     };
 
-    const handleApprove = (photo: Photo) => {
-        console.log('Approve photo:', photo.id);
-        // API call: PATCH /api/v1/photos/{id}/approve
+    const handleApprove = async (photo: Photo) => {
+        try {
+            await photoApi.approvePhoto(photo.id);
+            setSuccessMessage(`Photo "${photo.title}" has been approved`);
+            loadPhotos();
+            loadStats();
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            const apiError = handleApiError(err);
+            setError(apiError.message);
+            setTimeout(() => setError(null), 5000);
+        }
     };
 
     const handleReject = (photo: Photo) => {
@@ -241,30 +145,57 @@ const PhotosPage = () => {
         setShowApprovalModal(true);
     };
 
-    const confirmReject = () => {
+    const confirmReject = async () => {
         if (selectedPhoto && rejectionReason) {
-            console.log('Reject photo:', selectedPhoto.id, 'Reason:', rejectionReason);
-            // API call: PATCH /api/v1/photos/{id}/reject?reason={reason}
-            setShowApprovalModal(false);
-            setRejectionReason('');
+            try {
+                await photoApi.rejectPhoto(selectedPhoto.id, rejectionReason);
+                setSuccessMessage(`Photo "${selectedPhoto.title}" has been rejected`);
+                setShowApprovalModal(false);
+                setRejectionReason('');
+                loadPhotos();
+                loadStats();
+                setTimeout(() => setSuccessMessage(null), 3000);
+            } catch (err) {
+                const apiError = handleApiError(err);
+                setError(apiError.message);
+                setTimeout(() => setError(null), 5000);
+            }
         }
     };
 
-    const handleToggleFeatured = (photo: Photo) => {
-        console.log('Toggle featured:', photo.id, !photo.isFeatured);
-        // API call: PATCH /api/v1/photos/{id}/featured?featured={boolean}
+    const handleToggleFeatured = async (photo: Photo) => {
+        try {
+            await photoApi.setFeatured(photo.id, !photo.isFeatured);
+            setSuccessMessage(`Photo ${photo.isFeatured ? 'removed from' : 'added to'} featured`);
+            loadPhotos();
+            loadStats();
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            const apiError = handleApiError(err);
+            setError(apiError.message);
+            setTimeout(() => setError(null), 5000);
+        }
     };
 
-    const handleToggleActive = (photo: Photo) => {
-        console.log('Toggle active:', photo.id, !photo.isActive);
-        // API call: PATCH /api/v1/photos/{id}/activate or /deactivate
-    };
 
-    const handleDelete = (photo: Photo) => {
+    const handleDelete = async (photo: Photo) => {
         if (confirm(`Are you sure you want to delete "${photo.title}"?`)) {
-            console.log('Delete photo:', photo.id);
-            // API call: DELETE /api/v1/photos/{id}
+            try {
+                await photoApi.deletePhoto(photo.id);
+                setSuccessMessage(`Photo "${photo.title}" has been deleted`);
+                loadPhotos();
+                loadStats();
+                setTimeout(() => setSuccessMessage(null), 3000);
+            } catch (err) {
+                const apiError = handleApiError(err);
+                setError(apiError.message);
+                setTimeout(() => setError(null), 5000);
+            }
         }
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
     };
 
     return (
@@ -274,25 +205,20 @@ const PhotosPage = () => {
                     <h2>Photo Management</h2>
                     <p className="page-subtitle">Review and manage all photos on the platform</p>
                 </div>
-                <div className="header-actions">
-                    <div className="view-toggle">
-                        <button
-                            className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                            onClick={() => setViewMode('grid')}
-                            title="Grid View"
-                        >
-                            ⊞
-                        </button>
-                        <button
-                            className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                            onClick={() => setViewMode('list')}
-                            title="List View"
-                        >
-                            ☰
-                        </button>
-                    </div>
-                </div>
+
             </div>
+
+            {/* Success/Error Messages */}
+            {successMessage && (
+                <div className="alert alert-success">
+                    {successMessage}
+                </div>
+            )}
+            {error && (
+                <div className="alert alert-error">
+                    {error}
+                </div>
+            )}
 
             {/* Statistics Grid */}
             <div className="stats-grid">
@@ -342,12 +268,18 @@ const PhotosPage = () => {
                         placeholder="Search by title, description, or photographer..."
                         className="admin-search-input"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setCurrentPage(0);
+                        }}
                     />
                     <select
                         className="admin-filter-select"
                         value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
+                        onChange={(e) => {
+                            setStatusFilter(e.target.value);
+                            setCurrentPage(0);
+                        }}
                     >
                         <option value="ALL">All Status</option>
                         <option value="PENDING">Pending Approval</option>
@@ -358,87 +290,29 @@ const PhotosPage = () => {
                     <select
                         className="admin-filter-select"
                         value={categoryFilter}
-                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        onChange={(e) => {
+                            setCategoryFilter(e.target.value);
+                            setCurrentPage(0);
+                        }}
                     >
                         <option value="ALL">All Categories</option>
-                        <option value="Wildlife">Wildlife</option>
-                        <option value="Mammals">Mammals</option>
-                        <option value="Birds">Birds</option>
-                        <option value="Marine Life">Marine Life</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.name}>
+                                {category.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
                 {/* Photo Grid/List */}
-                {viewMode === 'grid' ? (
-                    <div className="photo-grid">
-                        {filteredPhotos.map((photo) => (
-                            <div key={photo.id} className="photo-card">
-                                <div className="photo-image-container">
-                                    <img src={photo.thumbnailUrl} alt={photo.title} className="photo-image" />
-                                    <div className="photo-overlay">
-                                        <div className="photo-stats">
-                                            <span title="Views">👁️ {photo.viewCount}</span>
-                                            <span title="Downloads">⬇️ {photo.downloadCount}</span>
-                                            <span title="Likes">❤️ {photo.likeCount}</span>
-                                        </div>
-                                        <div className="photo-actions">
-                                            <button
-                                                className="action-btn-overlay"
-                                                title="View Details"
-                                                onClick={() => handleViewDetails(photo)}
-                                            >
-                                                👁️
-                                            </button>
-                                            {!photo.isApproved && (
-                                                <>
-                                                    <button
-                                                        className="action-btn-overlay success"
-                                                        title="Approve"
-                                                        onClick={() => handleApprove(photo)}
-                                                    >
-                                                        ✓
-                                                    </button>
-                                                    <button
-                                                        className="action-btn-overlay danger"
-                                                        title="Reject"
-                                                        onClick={() => handleReject(photo)}
-                                                    >
-                                                        ✗
-                                                    </button>
-                                                </>
-                                            )}
-                                            <button
-                                                className={`action-btn-overlay ${photo.isFeatured ? 'featured' : ''}`}
-                                                title={photo.isFeatured ? 'Unfeature' : 'Feature'}
-                                                onClick={() => handleToggleFeatured(photo)}
-                                            >
-                                                ⭐
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="photo-badges">
-                                        {!photo.isApproved && <span className="badge pending">Pending</span>}
-                                        {photo.isApproved && <span className="badge approved">Approved</span>}
-                                        {photo.isFeatured && <span className="badge featured">Featured</span>}
-                                        {!photo.isActive && <span className="badge inactive">Inactive</span>}
-                                    </div>
-                                </div>
-                                <div className="photo-info">
-                                    <h4 className="photo-title">{photo.title}</h4>
-                                    <p className="photo-photographer">by @{photo.photographer.username}</p>
-                                    <div className="photo-meta">
-                                        <span>{photo.width}×{photo.height}</span>
-                                        <span>{formatFileSize(photo.fileSize)}</span>
-                                        <span>${photo.basePrice}</span>
-                                    </div>
-                                    <div className="photo-tags">
-                                        {photo.tags.slice(0, 3).map((tag, idx) => (
-                                            <span key={idx} className="tag">{tag}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                {loading ? (
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                        <p>Loading photos...</p>
+                    </div>
+                ) : photos.length === 0 ? (
+                    <div className="empty-state">
+                        <p>No photos found</p>
                     </div>
                 ) : (
                     <div className="admin-table-container">
@@ -456,7 +330,7 @@ const PhotosPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredPhotos.map((photo) => (
+                                {photos.map((photo) => (
                                     <tr key={photo.id}>
                                         <td>
                                             <div className="photo-cell">
@@ -467,7 +341,7 @@ const PhotosPage = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>@{photo.photographer.username}</td>
+                                        <td>@{photo.photographer?.username || 'Unknown'}</td>
                                         <td>{photo.width}×{photo.height}</td>
                                         <td className="price-cell">${photo.basePrice}</td>
                                         <td>
@@ -529,18 +403,49 @@ const PhotosPage = () => {
                 )}
 
                 {/* Pagination */}
-                <div className="table-pagination">
-                    <div className="pagination-info">
-                        Showing {filteredPhotos.length} of {mockPhotos.length} photos
+                {!loading && photos.length > 0 && (
+                    <div className="table-pagination">
+                        <div className="pagination-info">
+                            Showing {currentPage * pageSize + 1} to {Math.min((currentPage + 1) * pageSize, totalElements)} of {totalElements} photos
+                        </div>
+                        <div className="pagination-controls">
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 0}
+                            >
+                                Previous
+                            </button>
+                            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                                let pageNum = i;
+                                if (totalPages > 5) {
+                                    if (currentPage > 2) {
+                                        pageNum = currentPage - 2 + i;
+                                    }
+                                    if (pageNum >= totalPages) {
+                                        pageNum = totalPages - 5 + i;
+                                    }
+                                }
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        className={`btn btn-ghost btn-sm ${currentPage === pageNum ? 'active' : ''}`}
+                                        onClick={() => handlePageChange(pageNum)}
+                                    >
+                                        {pageNum + 1}
+                                    </button>
+                                );
+                            })}
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages - 1}
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
-                    <div className="pagination-controls">
-                        <button className="btn btn-ghost btn-sm">Previous</button>
-                        <button className="btn btn-ghost btn-sm active">1</button>
-                        <button className="btn btn-ghost btn-sm">2</button>
-                        <button className="btn btn-ghost btn-sm">3</button>
-                        <button className="btn btn-ghost btn-sm">Next</button>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* Photo Details Modal */}
@@ -562,7 +467,7 @@ const PhotosPage = () => {
 
                                     <div className="detail-section">
                                         <h4>Photographer</h4>
-                                        <p>@{selectedPhoto.photographer.username} ({selectedPhoto.photographer.firstName} {selectedPhoto.photographer.lastName})</p>
+                                        <p>@{selectedPhoto.photographer?.username || 'Unknown'} ({selectedPhoto.photographer?.firstName || ''} {selectedPhoto.photographer?.lastName || ''})</p>
                                     </div>
 
                                     <div className="detail-section">
@@ -623,18 +528,18 @@ const PhotosPage = () => {
                                     <div className="detail-section">
                                         <h4>Tags</h4>
                                         <div className="tags-list">
-                                            {selectedPhoto.tags.map((tag, idx) => (
-                                                <span key={idx} className="tag">{tag}</span>
-                                            ))}
+                                            {selectedPhoto.tags?.map((tag) => (
+                                                <span key={tag.id} className="tag">{tag.name}</span>
+                                            )) || <span>No tags</span>}
                                         </div>
                                     </div>
 
                                     <div className="detail-section">
                                         <h4>Categories</h4>
                                         <div className="tags-list">
-                                            {selectedPhoto.categories.map((cat, idx) => (
-                                                <span key={idx} className="category-tag">{cat}</span>
-                                            ))}
+                                            {selectedPhoto.categories?.map((cat) => (
+                                                <span key={cat.id} className="category-tag">{cat.name}</span>
+                                            )) || <span>No categories</span>}
                                         </div>
                                     </div>
                                 </div>

@@ -267,6 +267,218 @@ export const userApi = {
     },
 };
 
+// Admin User API
+export interface UserStats {
+    totalUsers: number;
+    activeUsers: number;
+    photographers: number;
+    buyers: number;
+    admins: number;
+    suspended: number;
+    unverified: number;
+}
+
+export interface PageResponse<T> {
+    content: T[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
+    first: boolean;
+    last: boolean;
+}
+
+export interface UserCreateRequest {
+    username: string;
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    role: 'ADMIN' | 'PHOTOGRAPHER' | 'BUYER';
+    isActive?: boolean;
+    emailVerified?: boolean;
+}
+
+export interface UserUpdateRequest {
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    role?: 'ADMIN' | 'PHOTOGRAPHER' | 'BUYER';
+    isActive?: boolean;
+    emailVerified?: boolean;
+}
+
+export const adminUserApi = {
+    /**
+     * Get all users with pagination and filters
+     */
+    getAllUsers: async (
+        page: number = 0,
+        size: number = 10,
+        role?: 'ADMIN' | 'PHOTOGRAPHER' | 'BUYER',
+        isActive?: boolean
+    ): Promise<PageResponse<User>> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            size: size.toString(),
+        });
+
+        if (role) params.append('role', role);
+        if (isActive !== undefined) params.append('isActive', isActive.toString());
+
+        const response = await apiClient.get(`/v1/admin/users?${params.toString()}`);
+        return response.data;
+    },
+
+    /**
+     * Get user statistics
+     */
+    getUserStats: async (): Promise<UserStats> => {
+        // Since the backend doesn't have a specific stats endpoint,
+        // we'll fetch all users and calculate stats on the frontend
+        const allUsers = await apiClient.get('/v1/admin/users?page=0&size=10000');
+        const users: User[] = allUsers.data.content;
+
+        return {
+            totalUsers: users.length,
+            activeUsers: users.filter(u => u.isActive).length,
+            photographers: users.filter(u => u.role === 'PHOTOGRAPHER').length,
+            buyers: users.filter(u => u.role === 'BUYER').length,
+            admins: users.filter(u => u.role === 'ADMIN').length,
+            suspended: users.filter(u => !u.isActive).length,
+            unverified: users.filter(u => !u.emailVerified).length,
+        };
+    },
+
+    /**
+     * Get user by ID
+     */
+    getUserById: async (userId: number): Promise<User> => {
+        const response = await apiClient.get(`/v1/admin/users/${userId}`);
+        return response.data;
+    },
+
+    /**
+     * Create new user
+     */
+    createUser: async (userData: UserCreateRequest): Promise<User> => {
+        const response = await apiClient.post('/v1/users', userData);
+        return response.data;
+    },
+
+    /**
+     * Update user
+     */
+    updateUser: async (userId: number, userData: UserUpdateRequest): Promise<User> => {
+        const response = await apiClient.put(`/v1/users/${userId}`, userData);
+        return response.data;
+    },
+
+    /**
+     * Activate user (uses UserController endpoint - no auth required on that endpoint)
+     */
+    activateUser: async (userId: number): Promise<User> => {
+        const response = await apiClient.put(`/v1/users/${userId}/activate`);
+        return response.data;
+    },
+
+    /**
+     * Deactivate user (uses UserController endpoint - no auth required on that endpoint)
+     */
+    deactivateUser: async (userId: number): Promise<User> => {
+        const response = await apiClient.put(`/v1/users/${userId}/deactivate`);
+        return response.data;
+    },
+
+    /**
+     * Verify user email
+     */
+    verifyEmail: async (userId: number): Promise<User> => {
+        const response = await apiClient.put(`/v1/users/${userId}/verify-email`);
+        return response.data;
+    },
+
+    /**
+     * Verify photographer
+     */
+    verifyPhotographer: async (userId: number): Promise<User> => {
+        const response = await apiClient.post(`/v1/admin/users/${userId}/verify-photographer`);
+        return response.data;
+    },
+
+    /**
+     * Change user role
+     */
+    changeUserRole: async (userId: number, newRole: 'ADMIN' | 'PHOTOGRAPHER' | 'BUYER'): Promise<User> => {
+        const response = await apiClient.put(`/v1/admin/users/${userId}/role?newRole=${newRole}`);
+        return response.data;
+    },
+
+    /**
+     * Ban user
+     */
+    banUser: async (userId: number, reason: string): Promise<User> => {
+        const response = await apiClient.post(`/v1/admin/users/${userId}/ban?reason=${encodeURIComponent(reason)}`);
+        return response.data;
+    },
+
+    /**
+     * Unban user
+     */
+    unbanUser: async (userId: number): Promise<User> => {
+        const response = await apiClient.post(`/v1/admin/users/${userId}/unban`);
+        return response.data;
+    },
+
+    /**
+     * Get banned users
+     */
+    getBannedUsers: async (page: number = 0, size: number = 10): Promise<PageResponse<User>> => {
+        const response = await apiClient.get(`/v1/admin/users/banned?page=${page}&size=${size}`);
+        return response.data;
+    },
+
+    /**
+     * Get verified photographers
+     */
+    getVerifiedPhotographers: async (page: number = 0, size: number = 10): Promise<PageResponse<User>> => {
+        const response = await apiClient.get(`/v1/admin/users/verified-photographers?page=${page}&size=${size}`);
+        return response.data;
+    },
+
+    /**
+     * Get unverified photographers
+     */
+    getUnverifiedPhotographers: async (page: number = 0, size: number = 10): Promise<PageResponse<User>> => {
+        const response = await apiClient.get(`/v1/admin/users/unverified-photographers?page=${page}&size=${size}`);
+        return response.data;
+    },
+
+    /**
+     * Get inactive users
+     */
+    getInactiveUsers: async (page: number = 0, size: number = 10): Promise<PageResponse<User>> => {
+        const response = await apiClient.get(`/v1/admin/users/inactive?page=${page}&size=${size}`);
+        return response.data;
+    },
+
+    /**
+     * Delete user (soft delete)
+     */
+    deleteUser: async (userId: number): Promise<void> => {
+        await apiClient.delete(`/v1/users/${userId}`);
+    },
+
+    /**
+     * Search users
+     */
+    searchUsers: async (searchTerm: string, page: number = 0, size: number = 10): Promise<PageResponse<User>> => {
+        const response = await apiClient.get(`/v1/users/search?term=${encodeURIComponent(searchTerm)}&page=${page}&size=${size}`);
+        return response.data;
+    },
+};
+
 // Error handler helper
 export const handleApiError = (error: any): ApiError => {
     if (error.response) {
@@ -290,5 +502,43 @@ export const handleApiError = (error: any): ApiError => {
         };
     }
 };
+
+// ============================================================================
+// Authentication Services
+// ============================================================================
+
+/**
+ * Logout service - clears all authentication data
+ */
+export const logout = () => {
+    // Clear all authentication tokens
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('token');
+
+    // Clear user data
+    localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
+
+    // Clear any session storage
+    sessionStorage.clear();
+
+    console.log('User logged out successfully');
+};
+
+// Photo Module API
+export { photoApi, categoryApi, tagApi } from './photo-api';
+export type {
+    Photo,
+    PhotoStats,
+    Category,
+    Tag,
+    PageResponse as PhotoPageResponse,
+    CategoryCreateDto,
+    CategoryUpdateDto,
+    CategoryWithCount,
+    CategoryStats
+} from './photo-api';
 
 export default apiClient;

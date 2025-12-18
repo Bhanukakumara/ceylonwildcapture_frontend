@@ -1,31 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 /* ===== CSS VARIABLES & DESIGN TOKENS ===== */
 :root {
-  /* Nature-inspired Color Palette */
-  --color-forest-dark: #0a2f1f;
-  --color-forest: #1a5c3a;
-  --color-forest-light: #2d7a52;
-  --color-earth-brown: #8b6f47;
-  --color-sunset-orange: #ff6b35;
-  --color-sunset-gold: #f7931e;
-  --color-sky-blue: #4a90e2;
-  --color-mist: #e8f4f0;
+  /* Base Colors */
+  --bg: #0F172A;
+  --surface: rgba(255,255,255,0.02);
+  --glass-overlay: rgba(255,255,255,0.06);
+  --glass-overlay-2: rgba(255,255,255,0.08);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-accent: rgba(59,130,246,0.12);
 
-  /* Neutral Colors */
-  --color-dark: #0f1419;
-  --color-dark-secondary: #1a1f26;
-  --color-dark-tertiary: #252b33;
-  --color-gray: #6b7280;
-  --color-light-gray: #9ca3af;
-  --color-white: #ffffff;
+  /* Primary Colors */
+  --primary: #3B82F6;
+  --primary-dark: #1E40AF;
+  --secondary: #7C3AED;
+  --accent-warm: #FB923C;
+
+  /* Text Colors */
+  --heading: #E6EEF8;
+  --text: #B9C6D8;
+  --muted: #98A6B8;
+
+  /* Status Colors */
+  --success: #10B981;
+  --danger: #EF4444;
+  --info: #06B6D4;
+
+  /* Legacy Color Mappings (for backward compatibility) */
+  --color-dark: #0F172A;
+  --color-dark-secondary: rgba(255,255,255,0.02);
+  --color-dark-tertiary: rgba(255,255,255,0.06);
+  --color-light-gray: #B9C6D8;
+  --color-white: #E6EEF8;
+  --color-sunset-orange: #FB923C;
+  --color-forest: #3B82F6;
+  --color-forest-light: #1E40AF;
 
   /* Gradients */
-  --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-  --gradient-forest: linear-gradient(135deg, #1a5c3a 0%, #2d7a52 100%);
-  --gradient-dark: linear-gradient(180deg, rgba(15, 20, 25, 0.95) 0%, rgba(15, 20, 25, 0.85) 100%);
-  --gradient-overlay: linear-gradient(180deg, rgba(15, 20, 25, 0) 0%, rgba(15, 20, 25, 0.8) 100%);
+  --gradient-sunset: linear-gradient(135deg, #FB923C 0%, #3B82F6 100%);
+  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #7C3AED 100%);
+  --gradient-dark: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.85) 100%);
+  --gradient-overlay: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.8) 100%);
 
   /* Spacing */
   --spacing-xs: 0.5rem;
@@ -37,20 +53,26 @@
   --spacing-3xl: 6rem;
 
   /* Typography */
-  --font-display: 'Playfair Display', serif;
-  --font-body: 'Inter', sans-serif;
+  --font-display: 'Poppins', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+
+  /* UI Properties */
+  --glass-blur: 12px;
+  --card-radius: 14px;
+  --card-padding: 1.25rem;
+  --shadow-color: rgba(2,6,23,0.6);
 
   /* Border Radius */
   --radius-sm: 0.5rem;
-  --radius-md: 1rem;
+  --radius-md: 14px;
   --radius-lg: 1.5rem;
   --radius-xl: 2rem;
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 8px var(--shadow-color);
+  --shadow-md: 0 4px 16px var(--shadow-color);
+  --shadow-lg: 0 8px 32px var(--shadow-color);
+  --shadow-xl: 0 16px 48px var(--shadow-color);
 
   /* Transitions */
   --transition-fast: 0.2s ease;
@@ -71,8 +93,8 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-dark);
-  color: var(--color-white);
+  background-color: var(--bg);
+  color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
 }
@@ -88,6 +110,7 @@ h6 {
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: var(--spacing-md);
+  color: var(--heading);
 }
 
 h1 {
@@ -110,7 +133,7 @@ h4 {
 
 p {
   font-size: clamp(1rem, 1.5vw, 1.125rem);
-  color: var(--color-light-gray);
+  color: var(--text);
   margin-bottom: var(--spacing-sm);
 }
 
@@ -132,18 +155,18 @@ p {
 
 /* Glassmorphism Effect */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--glass-overlay);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-lg);
 }
 
 .glass-dark {
-  background: rgba(15, 20, 25, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
 }
 
 /* Gradient Text */
@@ -164,7 +187,7 @@ p {
   font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--card-radius);
   border: none;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -172,35 +195,35 @@ p {
 }
 
 .btn-primary {
-  background: var(--gradient-sunset);
-  color: var(--color-white);
-  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+  background: var(--gradient-primary);
+  color: var(--heading);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 }
 
 .btn-secondary {
   background: transparent;
-  color: var(--color-white);
-  border: 2px solid var(--color-white);
+  color: var(--heading);
+  border: 2px solid var(--glass-border);
 }
 
 .btn-secondary:hover {
-  background: var(--color-white);
-  color: var(--color-dark);
+  background: var(--glass-overlay);
+  border-color: var(--primary);
 }
 
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--color-white);
-  backdrop-filter: blur(10px);
+  background: var(--glass-overlay);
+  color: var(--heading);
+  backdrop-filter: blur(var(--glass-blur));
 }
 
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--glass-overlay-2);
 }
 
 /* ===== ANIMATIONS ===== */
@@ -443,20 +466,20 @@ p {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-dark-secondary);
+  background: var(--surface);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-forest);
+  background: var(--primary);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-forest-light);
+  background: var(--primary-dark);
 }
 
 /* ===== SELECTION ===== */
 ::selection {
-  background: var(--color-sunset-orange);
-  color: var(--color-white);
+  background: var(--primary);
+  color: var(--heading);
 }

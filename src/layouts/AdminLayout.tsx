@@ -1,9 +1,25 @@
-import { Outlet, NavLink } from 'react-router-dom';
-import { useState } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { logout } from '../services/api';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const navigate = useNavigate();
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (userMenuOpen && !target.closest('.admin-user-menu')) {
+                setUserMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [userMenuOpen]);
 
     const adminMenuItems = [
         { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
@@ -16,6 +32,13 @@ const AdminLayout = () => {
         { path: '/admin/audit-logs', label: 'Audit Logs', icon: '📋' },
         { path: '/admin/settings', label: 'Settings', icon: '⚙️' },
     ];
+
+    const handleLogout = () => {
+        // Call logout service to clear all authentication data
+        logout();
+        // Redirect to login page
+        navigate('/login');
+    };
 
     return (
         <div className="admin-layout">
@@ -88,7 +111,7 @@ const AdminLayout = () => {
                             <span className="admin-notification-badge">5</span>
                         </button>
 
-                        <div className="admin-user-menu">
+                        <div className="admin-user-menu" onClick={() => setUserMenuOpen(!userMenuOpen)}>
                             <div className="admin-user-avatar">
                                 <span>AD</span>
                             </div>
@@ -96,6 +119,27 @@ const AdminLayout = () => {
                                 <div className="admin-user-name">Admin User</div>
                                 <div className="admin-user-role">Administrator</div>
                             </div>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="admin-dropdown-icon">
+                                <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+
+                            {userMenuOpen && (
+                                <div className="admin-user-dropdown">
+                                    <button className="admin-dropdown-item" onClick={(e) => { e.stopPropagation(); navigate('/admin/settings'); setUserMenuOpen(false); }}>
+                                        <span>⚙️</span>
+                                        <span>Settings</span>
+                                    </button>
+                                    <button className="admin-dropdown-item" onClick={(e) => { e.stopPropagation(); navigate('/admin/dashboard'); setUserMenuOpen(false); }}>
+                                        <span>👤</span>
+                                        <span>Profile</span>
+                                    </button>
+                                    <div className="admin-dropdown-divider"></div>
+                                    <button className="admin-dropdown-item logout" onClick={(e) => { e.stopPropagation(); handleLogout(); }}>
+                                        <span>🚪</span>
+                                        <span>Logout</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </header>

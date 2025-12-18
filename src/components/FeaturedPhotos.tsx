@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './FeaturedPhotos.css';
 
 interface Photo {
@@ -73,21 +74,22 @@ const FeaturedPhotos = () => {
 
                 <div className="photos-grid">
                     {photos.map((photo, index) => (
-                        <div
+                        <Link
                             key={photo.id}
+                            to={`/photo/${photo.id}`}
                             className={`photo-card animate-scale-in stagger-${(index % 6) + 1}`}
                         >
                             <div className="photo-image-wrapper image-zoom">
                                 <img src={photo.image} alt={photo.title} className="photo-image" />
                                 <div className="photo-overlay">
                                     <div className="photo-actions">
-                                        <button className="btn btn-ghost btn-icon" aria-label="Quick view">
+                                        <button className="btn btn-ghost btn-icon" aria-label="Quick view" onClick={(e) => e.preventDefault()}>
                                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                                 <path d="M10 4C5 4 1.73 7.11 1 10c.73 2.89 4 6 9 6s8.27-3.11 9-6c-.73-2.89-4-6-9-6z" stroke="currentColor" strokeWidth="2" />
                                                 <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="2" />
                                             </svg>
                                         </button>
-                                        <button className="btn btn-primary btn-icon" aria-label="Add to cart">
+                                        <button className="btn btn-primary btn-icon" aria-label="Add to cart" onClick={(e) => e.preventDefault()}>
                                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                                 <path d="M2 2h2l3.6 12h8.8l3.6-8H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
@@ -106,15 +108,15 @@ const FeaturedPhotos = () => {
                                 </div>
                                 <div className="photo-footer">
                                     <span className="photo-category">{photo.category}</span>
-                                    <button className="btn-link">
+                                    <span className="btn-link">
                                         View Details
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                         </svg>
-                                    </button>
+                                    </span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
 

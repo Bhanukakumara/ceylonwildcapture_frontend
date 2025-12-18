@@ -31,6 +31,9 @@
     overflow: hidden;
     transition: all var(--transition-normal);
     opacity: 0;
+    text-decoration: none;
+    display: block;
+    color: inherit;
 }
 
 .photo-card:hover {

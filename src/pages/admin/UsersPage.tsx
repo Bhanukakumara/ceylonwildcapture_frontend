@@ -1,24 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { adminUserApi, type User, type UserStats, type UserCreateRequest, handleApiError } from '../../services/api';
 import '../dashboard/Dashboard.css';
 import './AdminDashboard.css';
 import './UsersPage.css';
 
-interface User {
-    id: number;
-    username: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber?: string;
-    role: 'ADMIN' | 'PHOTOGRAPHER' | 'BUYER';
-    isActive: boolean;
-    emailVerified: boolean;
-    profileImageUrl?: string;
-    createdAt: string;
-    lastLogin?: string;
-}
-
 const UsersPage = () => {
+    const [users, setUsers] = useState<User[]>([]);
+    const [stats, setStats] = useState<UserStats>({
+        totalUsers: 0,
+        activeUsers: 0,
+        photographers: 0,
+        buyers: 0,
+        admins: 0,
+        suspended: 0,
+        unverified: 0,
+    });
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState<string>('ALL');
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -26,99 +22,75 @@ const UsersPage = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-    // Mock data - replace with API calls
-    const mockUsers: User[] = [
-        {
-            id: 1,
-            username: 'johndoe',
-            email: 'john.doe@example.com',
-            firstName: 'John',
-            lastName: 'Doe',
-            phoneNumber: '+94771234567',
-            role: 'PHOTOGRAPHER',
-            isActive: true,
-            emailVerified: true,
-            createdAt: '2024-01-15T10:30:00',
-            lastLogin: '2024-12-15T08:45:00'
-        },
-        {
-            id: 2,
-            username: 'janesmith',
-            email: 'jane.smith@example.com',
-            firstName: 'Jane',
-            lastName: 'Smith',
-            phoneNumber: '+94772345678',
-            role: 'BUYER',
-            isActive: true,
-            emailVerified: true,
-            createdAt: '2024-02-20T14:15:00',
-            lastLogin: '2024-12-14T16:20:00'
-        },
-        {
-            id: 3,
-            username: 'mikejohnson',
-            email: 'mike.johnson@example.com',
-            firstName: 'Mike',
-            lastName: 'Johnson',
-            phoneNumber: '+94773456789',
-            role: 'PHOTOGRAPHER',
-            isActive: true,
-            emailVerified: false,
-            createdAt: '2024-03-10T09:00:00',
-            lastLogin: '2024-12-13T12:30:00'
-        },
-        {
-            id: 4,
-            username: 'sarahwilliams',
-            email: 'sarah.williams@example.com',
-            firstName: 'Sarah',
-            lastName: 'Williams',
-            role: 'BUYER',
-            isActive: false,
-            emailVerified: true,
-            createdAt: '2024-01-05T11:45:00'
-        },
-        {
-            id: 5,
-            username: 'admin',
-            email: 'admin@ceylonwildcapture.com',
-            firstName: 'System',
-            lastName: 'Administrator',
-            phoneNumber: '+94770000000',
-            role: 'ADMIN',
-            isActive: true,
-            emailVerified: true,
-            createdAt: '2024-01-01T00:00:00',
-            lastLogin: '2024-12-15T09:00:00'
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+    const pageSize = 10;
+
+    // Form state for create/edit
+    const [formData, setFormData] = useState<UserCreateRequest>({
+        username: '',
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        role: 'BUYER',
+        isActive: true,
+        emailVerified: false,
+    });
+
+    // Load users on mount and when filters/pagination change
+    useEffect(() => {
+        loadUsers();
+        loadStats();
+    }, [currentPage, roleFilter, statusFilter]);
+
+    const loadUsers = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const role = roleFilter !== 'ALL' ? roleFilter as 'ADMIN' | 'PHOTOGRAPHER' | 'BUYER' : undefined;
+            const isActive = statusFilter === 'ACTIVE' ? true : statusFilter === 'INACTIVE' ? false : undefined;
+
+            const response = await adminUserApi.getAllUsers(currentPage, pageSize, role, isActive);
+            setUsers(response.content);
+            setTotalPages(response.totalPages);
+            setTotalElements(response.totalElements);
+        } catch (err) {
+            const apiError = handleApiError(err);
+            setError(apiError.message);
+            console.error('Failed to load users:', apiError);
+        } finally {
+            setLoading(false);
         }
-    ];
-
-    const stats = {
-        totalUsers: 1248,
-        activeUsers: 1156,
-        photographers: 342,
-        buyers: 901,
-        admins: 5,
-        suspended: 92,
-        unverified: 45
     };
 
-    const filteredUsers = mockUsers.filter(user => {
-        const matchesSearch = searchTerm === '' ||
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.lastName.toLowerCase().includes(searchTerm.toLowerCase());
+    const loadStats = async () => {
+        try {
+            const statsData = await adminUserApi.getUserStats();
+            setStats(statsData);
+        } catch (err) {
+            console.error('Failed to load stats:', err);
+        }
+    };
 
-        const matchesRole = roleFilter === 'ALL' || user.role === roleFilter;
-        const matchesStatus = statusFilter === 'ALL' ||
-            (statusFilter === 'ACTIVE' && user.isActive) ||
-            (statusFilter === 'INACTIVE' && !user.isActive) ||
-            (statusFilter === 'VERIFIED' && user.emailVerified) ||
-            (statusFilter === 'UNVERIFIED' && !user.emailVerified);
+    const filteredUsers = users.filter(user => {
+        if (searchTerm === '') return true;
 
-        return matchesSearch && matchesRole && matchesStatus;
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            user.username.toLowerCase().includes(searchLower) ||
+            user.email.toLowerCase().includes(searchLower) ||
+            user.firstName.toLowerCase().includes(searchLower) ||
+            user.lastName.toLowerCase().includes(searchLower)
+        );
     });
 
     const formatDate = (dateString: string) => {
@@ -147,24 +119,122 @@ const UsersPage = () => {
 
     const handleEditUser = (user: User) => {
         setSelectedUser(user);
+        setFormData({
+            username: user.username,
+            email: user.email,
+            password: '', // Don't populate password
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phoneNumber: user.phoneNumber || '',
+            role: user.role,
+            isActive: user.isActive,
+            emailVerified: user.emailVerified,
+        });
         setShowEditModal(true);
     };
 
-    const handleDeleteUser = (user: User) => {
+    const handleDeleteUser = async (user: User) => {
         if (confirm(`Are you sure you want to deactivate ${user.username}?`)) {
-            console.log('Deactivate user:', user.id);
-            // API call would go here
+            try {
+                await adminUserApi.deactivateUser(user.id);
+                setSuccessMessage(`User ${user.username} has been deactivated`);
+                loadUsers();
+                loadStats();
+                setTimeout(() => setSuccessMessage(null), 3000);
+            } catch (err) {
+                const apiError = handleApiError(err);
+                setError(apiError.message);
+                setTimeout(() => setError(null), 5000);
+            }
         }
     };
 
-    const handleActivateUser = (userId: number) => {
-        console.log('Activate user:', userId);
-        // API call would go here
+    const handleActivateUser = async (userId: number) => {
+        try {
+            await adminUserApi.activateUser(userId);
+            setSuccessMessage('User has been activated');
+            loadUsers();
+            loadStats();
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            const apiError = handleApiError(err);
+            setError(apiError.message);
+            setTimeout(() => setError(null), 5000);
+        }
     };
 
-    const handleVerifyEmail = (userId: number) => {
-        console.log('Verify email for user:', userId);
-        // API call would go here
+    const handleVerifyEmail = async (userId: number) => {
+        try {
+            await adminUserApi.verifyEmail(userId);
+            setSuccessMessage('Email has been verified');
+            loadUsers();
+            loadStats();
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            const apiError = handleApiError(err);
+            setError(apiError.message);
+            setTimeout(() => setError(null), 5000);
+        }
+    };
+
+    const handleCreateUser = async () => {
+        try {
+            setError(null);
+            await adminUserApi.createUser(formData);
+            setSuccessMessage('User created successfully');
+            setShowCreateModal(false);
+            loadUsers();
+            loadStats();
+            resetForm();
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            const apiError = handleApiError(err);
+            setError(apiError.message);
+        }
+    };
+
+    const handleUpdateUser = async () => {
+        if (!selectedUser) return;
+
+        try {
+            setError(null);
+            await adminUserApi.updateUser(selectedUser.id, {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phoneNumber: formData.phoneNumber,
+                role: formData.role,
+                isActive: formData.isActive,
+                emailVerified: formData.emailVerified,
+            });
+            setSuccessMessage('User updated successfully');
+            setShowEditModal(false);
+            loadUsers();
+            loadStats();
+            resetForm();
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            const apiError = handleApiError(err);
+            setError(apiError.message);
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            username: '',
+            email: '',
+            password: '',
+            firstName: '',
+            lastName: '',
+            phoneNumber: '',
+            role: 'BUYER',
+            isActive: true,
+            emailVerified: false,
+        });
+        setSelectedUser(null);
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
     };
 
     return (
@@ -181,6 +251,18 @@ const UsersPage = () => {
                     Create User
                 </button>
             </div>
+
+            {/* Success/Error Messages */}
+            {successMessage && (
+                <div className="alert alert-success">
+                    {successMessage}
+                </div>
+            )}
+            {error && (
+                <div className="alert alert-error">
+                    {error}
+                </div>
+            )}
 
             {/* Statistics Grid */}
             <div className="stats-grid">
@@ -235,7 +317,10 @@ const UsersPage = () => {
                     <select
                         className="admin-filter-select"
                         value={roleFilter}
-                        onChange={(e) => setRoleFilter(e.target.value)}
+                        onChange={(e) => {
+                            setRoleFilter(e.target.value);
+                            setCurrentPage(0);
+                        }}
                     >
                         <option value="ALL">All Roles</option>
                         <option value="ADMIN">Admins</option>
@@ -245,7 +330,10 @@ const UsersPage = () => {
                     <select
                         className="admin-filter-select"
                         value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
+                        onChange={(e) => {
+                            setStatusFilter(e.target.value);
+                            setCurrentPage(0);
+                        }}
                     >
                         <option value="ALL">All Status</option>
                         <option value="ACTIVE">Active</option>
@@ -256,124 +344,162 @@ const UsersPage = () => {
                 </div>
 
                 {/* Users Table */}
-                <div className="admin-table-container">
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Email Verified</th>
-                                <th>Last Login</th>
-                                <th>Joined</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredUsers.map((user) => (
-                                <tr key={user.id}>
-                                    <td>
-                                        <div className="user-cell">
-                                            <div className="user-avatar-small">
-                                                {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-                                            </div>
-                                            <div className="user-info-cell">
-                                                <div className="user-name">{user.firstName} {user.lastName}</div>
-                                                <div className="user-username">@{user.username}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="email-cell">{user.email}</td>
-                                    <td>{user.phoneNumber || '-'}</td>
-                                    <td>
-                                        <span className={`role-badge ${user.role.toLowerCase()}`}>
-                                            {user.role}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className={`status-badge ${user.isActive ? 'active' : 'suspended'}`}>
-                                            {user.isActive ? 'Active' : 'Suspended'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {user.emailVerified ? (
-                                            <span className="verified-badge">✓ Verified</span>
-                                        ) : (
-                                            <span className="unverified-badge">✗ Unverified</span>
-                                        )}
-                                    </td>
-                                    <td className="date-cell">{formatDateTime(user.lastLogin)}</td>
-                                    <td className="date-cell">{formatDate(user.createdAt)}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <button
-                                                className="action-btn"
-                                                title="View Details"
-                                                onClick={() => handleViewDetails(user)}
-                                            >
-                                                👁️
-                                            </button>
-                                            <button
-                                                className="action-btn"
-                                                title="Edit User"
-                                                onClick={() => handleEditUser(user)}
-                                            >
-                                                ✏️
-                                            </button>
-                                            {!user.emailVerified && (
-                                                <button
-                                                    className="action-btn"
-                                                    title="Verify Email"
-                                                    onClick={() => handleVerifyEmail(user.id)}
-                                                >
-                                                    ✉️
-                                                </button>
-                                            )}
-                                            {user.isActive ? (
-                                                <button
-                                                    className="action-btn danger"
-                                                    title="Deactivate"
-                                                    onClick={() => handleDeleteUser(user)}
-                                                >
-                                                    🚫
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className="action-btn success"
-                                                    title="Activate"
-                                                    onClick={() => handleActivateUser(user.id)}
-                                                >
-                                                    ✓
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                {loading ? (
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                        <p>Loading users...</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="admin-table-container">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Email Verified</th>
+                                        <th>Last Login</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredUsers.map((user) => (
+                                        <tr key={user.id}>
+                                            <td>
+                                                <div className="user-cell">
+                                                    <div className="user-avatar-small">
+                                                        {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                                                    </div>
+                                                    <div className="user-info-cell">
+                                                        <div className="user-name">{user.firstName} {user.lastName}</div>
+                                                        <div className="user-username">@{user.username}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="email-cell">{user.email}</td>
+                                            <td>{user.phoneNumber || '-'}</td>
+                                            <td>
+                                                <span className={`role-badge ${user.role.toLowerCase()}`}>
+                                                    {user.role}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className={`status-badge ${user.isActive ? 'active' : 'suspended'}`}>
+                                                    {user.isActive ? 'Active' : 'Suspended'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {user.emailVerified ? (
+                                                    <span className="verified-badge">✓ Verified</span>
+                                                ) : (
+                                                    <span className="unverified-badge">✗ Unverified</span>
+                                                )}
+                                            </td>
+                                            <td className="date-cell">{formatDateTime(user.lastLogin)}</td>
+                                            <td className="date-cell">{formatDate(user.createdAt)}</td>
+                                            <td>
+                                                <div className="table-actions">
+                                                    <button
+                                                        className="action-btn"
+                                                        title="View Details"
+                                                        onClick={() => handleViewDetails(user)}
+                                                    >
+                                                        👁️
+                                                    </button>
+                                                    <button
+                                                        className="action-btn"
+                                                        title="Edit User"
+                                                        onClick={() => handleEditUser(user)}
+                                                    >
+                                                        ✏️
+                                                    </button>
+                                                    {!user.emailVerified && (
+                                                        <button
+                                                            className="action-btn"
+                                                            title="Verify Email"
+                                                            onClick={() => handleVerifyEmail(user.id)}
+                                                        >
+                                                            ✉️
+                                                        </button>
+                                                    )}
+                                                    {user.isActive ? (
+                                                        <button
+                                                            className="action-btn danger"
+                                                            title="Deactivate"
+                                                            onClick={() => handleDeleteUser(user)}
+                                                        >
+                                                            🚫
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            className="action-btn success"
+                                                            title="Activate"
+                                                            onClick={() => handleActivateUser(user.id)}
+                                                        >
+                                                            ✓
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
-                {/* Pagination */}
-                <div className="table-pagination">
-                    <div className="pagination-info">
-                        Showing {filteredUsers.length} of {mockUsers.length} users
-                    </div>
-                    <div className="pagination-controls">
-                        <button className="btn btn-ghost btn-sm">Previous</button>
-                        <button className="btn btn-ghost btn-sm active">1</button>
-                        <button className="btn btn-ghost btn-sm">2</button>
-                        <button className="btn btn-ghost btn-sm">3</button>
-                        <button className="btn btn-ghost btn-sm">Next</button>
-                    </div>
-                </div>
+                        {/* Pagination */}
+                        <div className="table-pagination">
+                            <div className="pagination-info">
+                                Showing {currentPage * pageSize + 1} to {Math.min((currentPage + 1) * pageSize, totalElements)} of {totalElements} users
+                            </div>
+                            <div className="pagination-controls">
+                                <button
+                                    className="btn btn-ghost btn-sm"
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 0}
+                                >
+                                    Previous
+                                </button>
+                                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                                    let pageNum = i;
+                                    if (totalPages > 5) {
+                                        if (currentPage > 2) {
+                                            pageNum = currentPage - 2 + i;
+                                        }
+                                        if (pageNum >= totalPages) {
+                                            pageNum = totalPages - 5 + i;
+                                        }
+                                    }
+                                    return (
+                                        <button
+                                            key={pageNum}
+                                            className={`btn btn-ghost btn-sm ${currentPage === pageNum ? 'active' : ''}`}
+                                            onClick={() => handlePageChange(pageNum)}
+                                        >
+                                            {pageNum + 1}
+                                        </button>
+                                    );
+                                })}
+                                <button
+                                    className="btn btn-ghost btn-sm"
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages - 1}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* User Details Modal */}
             {showDetailsModal && selectedUser && (
-                <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
+                <div className="modal-overlay" onClick={() => setShowDetailsModal(false)} role="dialog" aria-modal="true">
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>User Details</h3>
@@ -442,63 +568,110 @@ const UsersPage = () => {
                 </div>
             )}
 
-            {/* Create/Edit User Modal Placeholder */}
-            {(showCreateModal || showEditModal) && (
-                <div className="modal-overlay" onClick={() => {
-                    setShowCreateModal(false);
-                    setShowEditModal(false);
-                }}>
+            {/* Create User Modal */}
+            {showCreateModal && (
+                <div className="modal-overlay" onClick={() => setShowCreateModal(false)} role="dialog" aria-modal="true">
                     <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h3>{showCreateModal ? 'Create New User' : 'Edit User'}</h3>
-                            <button className="modal-close" onClick={() => {
-                                setShowCreateModal(false);
-                                setShowEditModal(false);
-                            }}>×</button>
+                            <h3>Create New User</h3>
+                            <button className="modal-close" onClick={() => setShowCreateModal(false)}>×</button>
                         </div>
                         <div className="modal-body">
                             <div className="form-grid">
                                 <div className="form-group">
-                                    <label>Username *</label>
-                                    <input type="text" className="form-input" placeholder="johndoe" />
+                                    <label htmlFor="create-username">Username *</label>
+                                    <input
+                                        id="create-username"
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="johndoe"
+                                        value={formData.username}
+                                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    />
                                 </div>
                                 <div className="form-group">
-                                    <label>Email *</label>
-                                    <input type="email" className="form-input" placeholder="john@example.com" />
+                                    <label htmlFor="create-email">Email *</label>
+                                    <input
+                                        id="create-email"
+                                        type="email"
+                                        className="form-input"
+                                        placeholder="john@example.com"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    />
                                 </div>
                                 <div className="form-group">
-                                    <label>First Name *</label>
-                                    <input type="text" className="form-input" placeholder="John" />
+                                    <label htmlFor="create-firstName">First Name *</label>
+                                    <input
+                                        id="create-firstName"
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="John"
+                                        value={formData.firstName}
+                                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                    />
                                 </div>
                                 <div className="form-group">
-                                    <label>Last Name *</label>
-                                    <input type="text" className="form-input" placeholder="Doe" />
+                                    <label htmlFor="create-lastName">Last Name *</label>
+                                    <input
+                                        id="create-lastName"
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Doe"
+                                        value={formData.lastName}
+                                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                    />
                                 </div>
                                 <div className="form-group">
-                                    <label>Phone Number</label>
-                                    <input type="tel" className="form-input" placeholder="+94771234567" />
+                                    <label htmlFor="create-phoneNumber">Phone Number</label>
+                                    <input
+                                        id="create-phoneNumber"
+                                        type="tel"
+                                        className="form-input"
+                                        placeholder="+94771234567"
+                                        value={formData.phoneNumber}
+                                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                    />
                                 </div>
                                 <div className="form-group">
-                                    <label>Role *</label>
-                                    <select className="form-input">
+                                    <label htmlFor="create-role">Role *</label>
+                                    <select
+                                        id="create-role"
+                                        className="form-input"
+                                        value={formData.role}
+                                        onChange={(e) => setFormData({ ...formData, role: e.target.value as 'ADMIN' | 'PHOTOGRAPHER' | 'BUYER' })}
+                                    >
                                         <option value="BUYER">Buyer</option>
                                         <option value="PHOTOGRAPHER">Photographer</option>
                                         <option value="ADMIN">Admin</option>
                                     </select>
                                 </div>
-                                {showCreateModal && (
-                                    <div className="form-group full-width">
-                                        <label>Password *</label>
-                                        <input type="password" className="form-input" placeholder="Min 8 characters" />
-                                    </div>
-                                )}
+                                <div className="form-group full-width">
+                                    <label htmlFor="create-password">Password *</label>
+                                    <input
+                                        id="create-password"
+                                        type="password"
+                                        className="form-input"
+                                        placeholder="Min 8 characters"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    />
+                                </div>
                                 <div className="form-group full-width">
                                     <label className="checkbox-label">
-                                        <input type="checkbox" />
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.emailVerified}
+                                            onChange={(e) => setFormData({ ...formData, emailVerified: e.target.checked })}
+                                        />
                                         <span>Email Verified</span>
                                     </label>
                                     <label className="checkbox-label">
-                                        <input type="checkbox" defaultChecked />
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.isActive}
+                                            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                                        />
                                         <span>Active Account</span>
                                     </label>
                                 </div>
@@ -507,12 +680,100 @@ const UsersPage = () => {
                         <div className="modal-footer">
                             <button className="btn btn-ghost" onClick={() => {
                                 setShowCreateModal(false);
-                                setShowEditModal(false);
+                                resetForm();
                             }}>
                                 Cancel
                             </button>
-                            <button className="btn btn-primary">
-                                {showCreateModal ? 'Create User' : 'Save Changes'}
+                            <button className="btn btn-primary" onClick={handleCreateUser}>
+                                Create User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit User Modal */}
+            {showEditModal && selectedUser && (
+                <div className="modal-overlay" onClick={() => setShowEditModal(false)} role="dialog" aria-modal="true">
+                    <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Edit User</h3>
+                            <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="form-grid">
+                                <div className="form-group">
+                                    <label htmlFor="edit-firstName">First Name *</label>
+                                    <input
+                                        id="edit-firstName"
+                                        type="text"
+                                        className="form-input"
+                                        value={formData.firstName}
+                                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="edit-lastName">Last Name *</label>
+                                    <input
+                                        id="edit-lastName"
+                                        type="text"
+                                        className="form-input"
+                                        value={formData.lastName}
+                                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="edit-phoneNumber">Phone Number</label>
+                                    <input
+                                        id="edit-phoneNumber"
+                                        type="tel"
+                                        className="form-input"
+                                        value={formData.phoneNumber}
+                                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="edit-role">Role *</label>
+                                    <select
+                                        id="edit-role"
+                                        className="form-input"
+                                        value={formData.role}
+                                        onChange={(e) => setFormData({ ...formData, role: e.target.value as 'ADMIN' | 'PHOTOGRAPHER' | 'BUYER' })}
+                                    >
+                                        <option value="BUYER">Buyer</option>
+                                        <option value="PHOTOGRAPHER">Photographer</option>
+                                        <option value="ADMIN">Admin</option>
+                                    </select>
+                                </div>
+                                <div className="form-group full-width">
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.emailVerified}
+                                            onChange={(e) => setFormData({ ...formData, emailVerified: e.target.checked })}
+                                        />
+                                        <span>Email Verified</span>
+                                    </label>
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.isActive}
+                                            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                                        />
+                                        <span>Active Account</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-ghost" onClick={() => {
+                                setShowEditModal(false);
+                                resetForm();
+                            }}>
+                                Cancel
+                            </button>
+                            <button className="btn btn-primary" onClick={handleUpdateUser}>
+                                Save Changes
                             </button>
                         </div>
                     </div>
