@@ -24,19 +24,23 @@ export interface CreateOrderRequest {
 
 export interface OrderItem {
     id: number;
-    photo: {
-        id: number;
-        title: string;
-        imageUrl: string;
-    };
+    orderId: number;
+    photoId: number;
+    photoTitle: string;
+    photoThumbnailUrl: string;
+    photographerId: number;
+    photographerName: string;
     licenseType: string;
     price: number;
+    finalPrice: number;
 }
 
 export interface OrderResponse {
     id: number;
     orderNumber: string;
     buyerId: number;
+    buyerName: string;
+    buyerEmail: string;
     totalAmount: number;
     subtotal: number;
     taxAmount: number;
@@ -44,7 +48,25 @@ export interface OrderResponse {
     status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED';
     itemCount: number;
     createdAt: string;
-    orderItems: OrderItem[];
+    items: OrderItem[];
+}
+
+export interface OrderSummaryDto {
+    id: number;
+    orderNumber: string;
+    totalAmount: number;
+    status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED';
+    itemCount: number;
+    firstPhotoThumbnail: string | null;
+    createdAt: string;
+}
+
+export interface PageResponse<T> {
+    content: T[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
 }
 
 export const orderApi = {
@@ -65,10 +87,10 @@ export const orderApi = {
     },
 
     /**
-     * Get current user's orders
+     * Get current user's orders (summary view)
      */
-    getMyOrders: async (page: number = 0, size: number = 20): Promise<any> => {
-        const response = await apiClient.get(`/v1/orders/my-orders?page=${page}&size=${size}`);
+    getMyOrders: async (page: number = 0, size: number = 20): Promise<PageResponse<OrderSummaryDto>> => {
+        const response = await apiClient.get<PageResponse<OrderSummaryDto>>(`/v1/orders/my-orders?page=${page}&size=${size}`);
         return response.data;
     },
 

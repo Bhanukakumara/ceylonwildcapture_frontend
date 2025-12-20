@@ -29,7 +29,7 @@
 .sidebar-logo {
     width: 40px;
     height: 40px;
-    color: var(--color-sunset-orange);
+    color: var(--primary);
     flex-shrink: 0;
 }
 
@@ -176,7 +176,7 @@
     position: absolute;
     top: 0;
     right: 0;
-    background: var(--color-sunset-orange);
+    background: var(--primary);
     color: var(--color-white);
     font-size: 0.7rem;
     font-weight: 700;

@@ -49,8 +49,8 @@ const Photographers = () => {
         <section className="photographers section-sm" id="photographers">
             <div className="container">
                 <div className="section-header">
-                    <h2 className="section-title animate-fade-in-up">Featured Photographers</h2>
-                    <p className="section-subtitle animate-fade-in-up stagger-1">
+                    <h2 className="section-title" data-aos="fade-up">Featured Photographers</h2>
+                    <p className="section-subtitle" data-aos="fade-up" data-aos-delay="100">
                         Meet the talented artists behind these stunning captures
                     </p>
                 </div>
@@ -59,7 +59,9 @@ const Photographers = () => {
                     {photographers.map((photographer, index) => (
                         <div
                             key={photographer.id}
-                            className={`photographer-card glass hover-lift animate-scale-in stagger-${(index % 4) + 1}`}
+                            className="photographer-card glass hover-lift"
+                            data-aos="slide-up"
+                            data-aos-delay={index * 100}
                         >
                             <div className="photographer-avatar">
                                 <div className="avatar-icon">{photographer.avatar}</div>
@@ -95,7 +97,7 @@ const Photographers = () => {
                     ))}
                 </div>
 
-                <div className="section-cta">
+                <div className="section-cta" data-aos="fade-up" data-aos-delay="400">
                     <button className="btn btn-secondary">
                         View All Photographers
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

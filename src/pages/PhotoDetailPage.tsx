@@ -183,7 +183,7 @@ const PhotoDetailPage = () => {
                     {/* Main Image Section */}
                     <div className="photo-main-section">
                         <div className={`photo-viewer ${isZoomed ? 'zoomed' : ''}`} onClick={() => setIsZoomed(!isZoomed)}>
-                            <img src={photo.imageUrl} alt={photo.title} />
+                            <img src={photo.watermarkedUrl || photo.imageUrl} alt={photo.title} />
                             {!isZoomed && (
                                 <div className="zoom-hint">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">

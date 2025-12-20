@@ -1,23 +1,22 @@
 import { useState, useEffect } from 'react';
-import { orderApi, type OrderResponse, type OrderItem } from '../services/order-api';
+import { Link } from 'react-router-dom';
+import { orderApi, type OrderSummaryDto, type OrderItem } from '../services/order-api';
 import './OrdersPage.css';
 
 const OrdersPage = () => {
-    const [orders, setOrders] = useState<OrderResponse[]>([]);
+    const [orders, setOrders] = useState<OrderSummaryDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [expandedOrders, setExpandedOrders] = useState<Record<number, boolean>>({});
+    const [orderPhotos, setOrderPhotos] = useState<Record<number, OrderItem[]>>({});
+    const [fetchingPhotos, setFetchingPhotos] = useState<Record<number, boolean>>({});
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
                 setLoading(true);
                 const response = await orderApi.getMyOrders();
-                // Ensure we handle pagination if response is a Page object
-                if ('content' in response) {
-                    setOrders((response as any).content);
-                } else {
-                    setOrders(response as any);
-                }
+                setOrders(response.content);
             } catch (err: any) {
                 setError(err.message || 'Failed to fetch orders');
             } finally {
@@ -28,10 +27,32 @@ const OrdersPage = () => {
         fetchOrders();
     }, []);
 
+    const togglePhotos = async (orderId: number) => {
+        if (expandedOrders[orderId]) {
+            setExpandedOrders(prev => ({ ...prev, [orderId]: false }));
+            return;
+        }
+
+        setExpandedOrders(prev => ({ ...prev, [orderId]: true }));
+
+        if (!orderPhotos[orderId] && !fetchingPhotos[orderId]) {
+            try {
+                setFetchingPhotos(prev => ({ ...prev, [orderId]: true }));
+                const response = await orderApi.getOrderById(orderId);
+                setOrderPhotos(prev => ({ ...prev, [orderId]: response.items }));
+            } catch (err) {
+                console.error('Failed to fetch order photos:', err);
+            } finally {
+                setFetchingPhotos(prev => ({ ...prev, [orderId]: false }));
+            }
+        }
+    };
+
     const getStatusClass = (status: string) => {
         switch (status.toUpperCase()) {
             case 'COMPLETED': return 'status-completed';
             case 'PENDING': return 'status-pending';
+            case 'PROCESSING': return 'status-processing';
             case 'CANCELLED': return 'status-cancelled';
             case 'REFUNDED': return 'status-refunded';
             default: return '';
@@ -42,7 +63,41 @@ const OrdersPage = () => {
         return (
             <div className="orders-page">
                 <div className="container">
-                    <div className="loading-state">Loading your orders...</div>
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                        <p>Loading your orders...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="orders-page">
+                <div className="container">
+                    <div className="error-container">
+                        <p className="error-message">{error}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (orders.length === 0) {
+        return (
+            <div className="orders-page">
+                <div className="container">
+                    <div className="orders-header">
+                        <h1>My Orders</h1>
+                        <p>Track and manage your photo purchases</p>
+                    </div>
+                    <div className="empty-state">
+                        <p>No orders found. Start exploring our amazing wildlife photography collection!</p>
+                        <Link to="/explore" className="btn btn-primary">
+                            Explore Photos
+                        </Link>
+                    </div>
                 </div>
             </div>
         );
@@ -53,57 +108,94 @@ const OrdersPage = () => {
             <div className="container">
                 <div className="orders-header">
                     <h1>My Orders</h1>
-                    <p className="orders-subtitle">Track and manage your photo purchases</p>
+                    <p>Track and manage your photo purchases</p>
                 </div>
 
-                {error && <div className="error-message glass">{error}</div>}
-
-                {orders.length === 0 ? (
-                    <div className="empty-orders glass">
-                        <div className="empty-icon">🛍️</div>
-                        <h2>No orders found</h2>
-                        <p>You haven't made any purchases yet.</p>
-                        <a href="/explore" className="btn btn-primary">Start Exploring</a>
-                    </div>
-                ) : (
-                    <div className="orders-list">
-                        {orders.map(order => (
-                            <div key={order.id} className="order-card glass">
-                                <div className="order-info">
-                                    <h3>Order #{order.orderNumber}</h3>
-                                    <div className="order-meta">
-                                        <div className="order-meta-item">
-                                            <span>📅</span> {new Date(order.createdAt).toLocaleDateString()}
+                <div className="orders-list">
+                    {orders.map((order) => (
+                        <div key={order.id} className="order-item-wrapper">
+                            <div className="order-card-row">
+                                <div className="order-main-info">
+                                    <div className="order-primary-details">
+                                        <div className="order-id-group">
+                                            <h3>Order #{order.orderNumber}</h3>
+                                            <span className="order-date">
+                                                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })}
+                                            </span>
                                         </div>
-                                        <div className="order-meta-item">
-                                            <span>📦</span> {order.orderItems.length} {order.orderItems.length === 1 ? 'Item' : 'Items'}
-                                        </div>
+                                        <span className={`status-badge ${getStatusClass(order.status)}`}>
+                                            {order.status}
+                                        </span>
                                     </div>
-                                    <div className="order-items-preview">
-                                        {order.orderItems.map((item: OrderItem) => (
-                                            <div key={item.id} className="order-item-thumb">
-                                                <img src={item.photo.imageUrl} alt={item.photo.title} />
-                                            </div>
-                                        ))}
+
+                                    <div className="order-secondary-details">
+                                        <div className="order-items-summary">
+                                            <span className="item-count">
+                                                📦 {order.itemCount} {order.itemCount === 1 ? 'Item' : 'Items'}
+                                            </span>
+                                            {order.itemCount > 1 && (
+                                                <button
+                                                    className="view-photos-toggle"
+                                                    onClick={() => togglePhotos(order.id)}
+                                                >
+                                                    {expandedOrders[order.id] ? 'Hide photos' : 'View all photos'}
+                                                </button>
+                                            )}
+                                        </div>
+                                        <span className="order-price">${order.totalAmount.toFixed(2)}</span>
                                     </div>
                                 </div>
-                                <div className="order-status-section">
-                                    <span className={`status-badge ${getStatusClass(order.status)}`}>
-                                        {order.status}
-                                    </span>
-                                    <div className="order-total">
-                                        ${order.totalAmount.toFixed(2)}
-                                    </div>
+
+                                <div className="order-thumbnail-preview">
+                                    {order.firstPhotoThumbnail ? (
+                                        <img
+                                            src={order.firstPhotoThumbnail}
+                                            alt={`Order ${order.orderNumber}`}
+                                            className="row-thumbnail"
+                                        />
+                                    ) : (
+                                        <div className="row-thumbnail-placeholder">📦</div>
+                                    )}
+                                </div>
+
+                                <div className="order-row-actions">
+                                    <Link to={`/orders/${order.id}`} className="btn btn-ghost btn-sm">
+                                        View Details
+                                    </Link>
                                     {order.status.toUpperCase() === 'COMPLETED' && (
-                                        <button className="btn btn-ghost btn-sm" style={{ marginTop: '1rem' }}>
-                                            Download Photos
+                                        <button className="btn btn-primary btn-sm">
+                                            Download
                                         </button>
                                     )}
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                )}
+
+                            {expandedOrders[order.id] && (
+                                <div className="order-expanded-photos glass">
+                                    {fetchingPhotos[order.id] ? (
+                                        <div className="mini-loader">
+                                            <div className="spinner-sm"></div>
+                                            <span>Fetching photos...</span>
+                                        </div>
+                                    ) : (
+                                        <div className="photos-strip">
+                                            {orderPhotos[order.id]?.map((item) => (
+                                                <div key={item.id} className="photo-item">
+                                                    <img src={item.photoThumbnailUrl} alt={item.photoTitle} />
+                                                    <span className="photo-title">{item.photoTitle}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );

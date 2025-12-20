@@ -21,7 +21,7 @@
 .footer-logo {
     width: 40px;
     height: 40px;
-    color: var(--color-sunset-orange);
+    color: var(--primary);
 }
 
 .footer-brand-name {
@@ -87,7 +87,7 @@
 }
 
 .footer-links a:hover {
-    color: var(--color-sunset-orange);
+    color: var(--primary);
     transform: translateX(4px);
 }
 

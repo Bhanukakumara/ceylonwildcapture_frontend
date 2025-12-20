@@ -39,8 +39,8 @@
 
 .photographer-card:hover .avatar-icon {
     transform: scale(1.1);
-    border-color: var(--color-sunset-orange);
-    box-shadow: 0 0 30px rgba(255, 107, 53, 0.4);
+    border-color: var(--primary);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
 }
 
 .featured-badge {
@@ -88,7 +88,7 @@
 }
 
 .photographer-stats svg {
-    color: var(--color-sunset-orange);
+    color: var(--primary);
 }
 
 .btn-full {

@@ -11,7 +11,7 @@
     transform: translate(-50%, -50%);
     width: 1000px;
     height: 1000px;
-    background: radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
     pointer-events: none;
     animation: float 8s ease-in-out infinite;
 }
@@ -46,13 +46,13 @@
     align-items: center;
     justify-content: center;
     color: var(--color-white);
-    box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
     transition: all var(--transition-normal);
 }
 
 .cta-card:hover .cta-icon {
     transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 12px 32px rgba(255, 107, 53, 0.5);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5);
 }
 
 .cta-title {
@@ -87,7 +87,7 @@
 }
 
 .cta-features svg {
-    color: var(--color-sunset-orange);
+    color: var(--primary);
     flex-shrink: 0;
 }
 
@@ -112,8 +112,8 @@
 .newsletter-input:focus {
     outline: none;
     background: rgba(255, 255, 255, 0.08);
-    border-color: var(--color-sunset-orange);
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .newsletter-input::placeholder {

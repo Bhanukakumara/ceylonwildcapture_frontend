@@ -29,16 +29,16 @@ const Hero = () => {
 
             <div className="hero-content">
                 <div className="container">
-                    <div className="hero-text animate-fade-in-up">
-                        <h1 className="hero-title">
+                    <div className="hero-text">
+                        <h1 className="hero-title" data-aos="fade-up">
                             Capture the <span className="gradient-text">Wild Beauty</span> of Ceylon
                         </h1>
-                        <p className="hero-subtitle">
+                        <p className="hero-subtitle" data-aos="fade-up" data-aos-delay="100">
                             Discover and purchase stunning wildlife photography from Sri Lanka's most talented photographers.
                             Every image tells a story of nature's magnificence.
                         </p>
 
-                        <div className="hero-search">
+                        <div className="hero-search" data-aos="fade-up" data-aos-delay="200">
                             <svg className="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                 <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
                                 <path d="M16 16L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -51,7 +51,7 @@ const Hero = () => {
                             <button className="btn btn-primary search-btn">Search</button>
                         </div>
 
-                        <div className="hero-stats animate-fade-in-up stagger-2">
+                        <div className="hero-stats" data-aos="fade-up" data-aos-delay="300">
                             <div className="stat">
                                 <div className="stat-number">10,000+</div>
                                 <div className="stat-label">Photos</div>

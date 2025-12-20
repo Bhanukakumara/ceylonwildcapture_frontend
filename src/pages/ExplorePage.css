@@ -52,7 +52,7 @@
 
 .search-input:focus {
     outline: none;
-    border-color: var(--color-sunset-orange);
+    border-color: var(--primary);
     background: var(--color-dark-secondary);
 }
 
@@ -117,7 +117,7 @@
 
 .filter-select:focus {
     outline: none;
-    border-color: var(--color-sunset-orange);
+    border-color: var(--primary);
 }
 
 .explore-grid {
@@ -180,7 +180,7 @@
     width: 50px;
     height: 50px;
     border: 4px solid rgba(255, 255, 255, 0.1);
-    border-top-color: var(--color-sunset-orange);
+    border-top-color: var(--primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
@@ -228,8 +228,41 @@
     font-family: var(--font-display);
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--color-sunset-orange);
+    color: var(--primary);
 }
+
+.explore-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.explore-actions .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+}
+
+.explore-actions .btn.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-color: #10b981;
+}
+
+.explore-actions .btn.btn-success:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 
 .explore-pagination {
     display: flex;

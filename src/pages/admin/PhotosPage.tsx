@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { photoApi, categoryApi, type Photo, type PhotoStats, type Category, handleApiError } from '../../services/api';
+import AddPhotoModal from '../../components/AddPhotoModal';
 import '../dashboard/Dashboard.css';
 import './AdminDashboard.css';
 import './PhotosPage.css';
@@ -30,6 +31,7 @@ const PhotosPage = () => {
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showApprovalModal, setShowApprovalModal] = useState(false);
+    const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
 
     // View and pagination state
@@ -105,6 +107,13 @@ const PhotosPage = () => {
         } catch (err) {
             console.error('Failed to load categories:', err);
         }
+    };
+
+    const handleUploadSuccess = () => {
+        setSuccessMessage('Photo uploaded successfully and is pending approval');
+        loadPhotos();
+        loadStats();
+        setTimeout(() => setSuccessMessage(null), 3000);
     };
 
     const formatFileSize = (bytes: number) => {
@@ -205,8 +214,17 @@ const PhotosPage = () => {
                     <h2>Photo Management</h2>
                     <p className="page-subtitle">Review and manage all photos on the platform</p>
                 </div>
-
+                <button
+                    className="btn btn-primary"
+                    onClick={() => setShowAddPhotoModal(true)}
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    Add Photo
+                </button>
             </div>
+
 
             {/* Success/Error Messages */}
             {successMessage && (
@@ -618,6 +636,13 @@ const PhotosPage = () => {
                     </div>
                 </div>
             )}
+
+            {/* Add Photo Modal */}
+            <AddPhotoModal
+                isOpen={showAddPhotoModal}
+                onClose={() => setShowAddPhotoModal(false)}
+                onSuccess={handleUploadSuccess}
+            />
         </div>
     );
 };

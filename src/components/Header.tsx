@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import { authApi, type User } from '../services/api';
+import { useCart } from '../contexts/CartContext';
 
 const Header = () => {
     const [scrolled, setScrolled] = useState(false);
@@ -15,6 +16,9 @@ const Header = () => {
     const searchRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
+
+    // Get cart item count
+    const { getItemCount } = useCart();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -167,7 +171,9 @@ const Header = () => {
                                     <circle cx="9" cy="18" r="1" fill="currentColor" />
                                     <circle cx="16" cy="18" r="1" fill="currentColor" />
                                 </svg>
-                                <span className="cart-badge">3</span>
+                                {getItemCount() > 0 && (
+                                    <span className="cart-badge">{getItemCount()}</span>
+                                )}
                             </Link>
                         )}
 
@@ -200,7 +206,7 @@ const Header = () => {
                                         </div>
                                         <div className="profile-dropdown-divider"></div>
                                         <Link
-                                            to="/dashboard/purchases"
+                                            to="/orders"
                                             className="profile-dropdown-item"
                                             onClick={() => setProfileMenuOpen(false)}
                                         >

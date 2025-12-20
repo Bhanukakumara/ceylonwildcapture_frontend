@@ -1,4 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import './App.css';
 
 // Contexts
@@ -22,8 +25,7 @@ import OrdersPage from './pages/OrdersPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignUpPage from './pages/auth/SignUpPage';
 
-// Dashboard Pages
-import DashboardPage from './pages/dashboard/DashboardPage';
+// Dashboard Pages - Removed (using OrdersPage instead)
 
 // Photographer Pages
 import PhotographerDashboardPage from './pages/photographer/PhotographerDashboardPage';
@@ -40,11 +42,22 @@ import AuditLogsPage from './pages/admin/AuditLogsPage';
 // Protected Route
 import ProtectedRoute from './components/ProtectedRoute';
 import UnauthorizedPage from './pages/UnauthorizedPage';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-in-out',
+      once: true,
+      offset: 100,
+    });
+  }, []);
+
   return (
     <CartProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           {/* Public Routes with MainLayout */}
           <Route element={<MainLayout />}>
@@ -68,6 +81,31 @@ function App() {
                 <OrdersPage />
               </ProtectedRoute>
             } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <OrdersPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/purchases" element={
+              <ProtectedRoute>
+                <OrdersPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/favorites" element={
+              <ProtectedRoute>
+                <div className="dashboard-overview"><h2>Favorites</h2><p className="page-subtitle">Coming Soon</p></div>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/settings" element={
+              <ProtectedRoute>
+                <div className="dashboard-overview"><h2>Settings</h2><p className="page-subtitle">Coming Soon</p></div>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <div className="dashboard-overview"><h2>Settings</h2><p className="page-subtitle">Coming Soon</p></div>
+              </ProtectedRoute>
+            } />
           </Route>
 
           {/* Auth Routes with AuthLayout */}
@@ -77,13 +115,7 @@ function App() {
             <Route path="/forgot-password" element={<div className="auth-form-container"><h2 className="auth-form-title">Forgot Password</h2><p className="auth-form-subtitle">Coming Soon</p></div>} />
           </Route>
 
-          {/* User Dashboard Routes with DashboardLayout */}
-          <Route element={<DashboardLayout userType="buyer" />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/dashboard/purchases" element={<OrdersPage />} />
-            <Route path="/dashboard/favorites" element={<div className="dashboard-overview"><h2>Favorites</h2><p className="page-subtitle">Coming Soon</p></div>} />
-            <Route path="/dashboard/settings" element={<div className="dashboard-overview"><h2>Settings</h2><p className="page-subtitle">Coming Soon</p></div>} />
-          </Route>
+          {/* User Dashboard Routes - Moved to MainLayout */}
 
           {/* Photographer Dashboard Routes with DashboardLayout */}
           <Route element={<DashboardLayout userType="photographer" />}>

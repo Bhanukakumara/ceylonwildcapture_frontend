@@ -66,8 +66,8 @@ const FeaturedPhotos = () => {
         <section className="featured-photos section" id="explore">
             <div className="container">
                 <div className="section-header">
-                    <h2 className="section-title animate-fade-in-up">Featured Collection</h2>
-                    <p className="section-subtitle animate-fade-in-up stagger-1">
+                    <h2 className="section-title" data-aos="fade-up">Featured Collection</h2>
+                    <p className="section-subtitle" data-aos="fade-up" data-aos-delay="100">
                         Handpicked masterpieces from our talented community of wildlife photographers
                     </p>
                 </div>
@@ -77,7 +77,9 @@ const FeaturedPhotos = () => {
                         <Link
                             key={photo.id}
                             to={`/photo/${photo.id}`}
-                            className={`photo-card animate-scale-in stagger-${(index % 6) + 1}`}
+                            className="photo-card"
+                            data-aos="zoom-in"
+                            data-aos-delay={index * 100}
                         >
                             <div className="photo-image-wrapper image-zoom">
                                 <img src={photo.image} alt={photo.title} className="photo-image" />
@@ -120,7 +122,7 @@ const FeaturedPhotos = () => {
                     ))}
                 </div>
 
-                <div className="section-cta">
+                <div className="section-cta" data-aos="fade-up" data-aos-delay="400">
                     <button className="btn btn-secondary btn-lg">
                         Explore All Photos
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

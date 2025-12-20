@@ -124,7 +124,7 @@
     font-family: var(--font-display);
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--color-sunset-orange);
+    color: var(--primary);
     white-space: nowrap;
 }
 
@@ -149,7 +149,7 @@
 .btn-link {
     background: transparent;
     border: none;
-    color: var(--color-sunset-orange);
+    color: var(--primary);
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
@@ -162,7 +162,7 @@
 
 .btn-link:hover {
     gap: 0.75rem;
-    color: var(--color-sunset-gold);
+    color: var(--primary-dark);
 }
 
 .section-cta {

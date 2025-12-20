@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { photoApi, categoryApi, type Photo, type Category } from '../services/api';
+import { useCart } from '../contexts/CartContext';
 import './ExplorePage.css';
 
 const ExplorePage = () => {
@@ -15,6 +16,11 @@ const ExplorePage = () => {
     const [sortBy, setSortBy] = useState<string>('newest');
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
+    // Cart functionality
+    const { addToCart } = useCart();
+    const [addingToCart, setAddingToCart] = useState<{ [key: number]: boolean }>({});
+    const [addedToCart, setAddedToCart] = useState<{ [key: number]: boolean }>({});
 
     const pageSize = 12;
 
@@ -49,13 +55,9 @@ const ExplorePage = () => {
             let response;
 
             // Determine sort parameter
-            let sort = 'createdAt,desc'; // newest
             if (sortBy === 'popular') {
-                sort = 'viewCount,desc';
             } else if (sortBy === 'price-low') {
-                sort = 'basePrice,asc';
             } else if (sortBy === 'price-high') {
-                sort = 'basePrice,desc';
             }
 
             // Fetch photos based on search or filters
@@ -100,12 +102,42 @@ const ExplorePage = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const handleAddToCart = async (photo: Photo, e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent navigation to photo detail
+        e.stopPropagation();
+
+        try {
+            setAddingToCart(prev => ({ ...prev, [photo.id]: true }));
+
+            await addToCart(
+                photo.id,
+                photo.title,
+                photo.thumbnailUrl || photo.imageUrl,
+                photo.photographer?.username || 'Unknown',
+                'PERSONAL', // Default license type
+                photo.basePrice
+            );
+
+            // Show success feedback
+            setAddedToCart(prev => ({ ...prev, [photo.id]: true }));
+
+            // Reset success feedback after 2 seconds
+            setTimeout(() => {
+                setAddedToCart(prev => ({ ...prev, [photo.id]: false }));
+            }, 2000);
+        } catch (error) {
+            console.error('Failed to add to cart:', error);
+        } finally {
+            setAddingToCart(prev => ({ ...prev, [photo.id]: false }));
+        }
+    };
+
     return (
         <div className="explore-page">
             <div className="container">
                 <div className="explore-header">
-                    <h1>Explore Wildlife Photography</h1>
-                    <p>Browse through our collection of stunning wildlife photos from Sri Lanka</p>
+                    <h1 data-aos="fade-up">Explore Wildlife Photography</h1>
+                    <p data-aos="fade-up" data-aos-delay="100">Browse through our collection of stunning wildlife photos from Sri Lanka</p>
                 </div>
 
                 {/* Search Bar */}
@@ -184,8 +216,14 @@ const ExplorePage = () => {
                 ) : (
                     <>
                         <div className="explore-grid">
-                            {photos.map((photo) => (
-                                <Link key={photo.id} to={`/photo/${photo.id}`} className="explore-card glass hover-lift">
+                            {photos.map((photo, index) => (
+                                <Link
+                                    key={photo.id}
+                                    to={`/photo/${photo.id}`}
+                                    className="explore-card glass hover-lift"
+                                    data-aos="fade-up"
+                                    data-aos-delay={Math.min(index * 50, 300)}
+                                >
                                     <div className="explore-image-wrapper">
                                         <img
                                             src={photo.thumbnailUrl || photo.imageUrl}
@@ -201,7 +239,34 @@ const ExplorePage = () => {
                                         </p>
                                         <div className="explore-footer">
                                             <span className="explore-price">${photo.basePrice.toFixed(2)}</span>
-                                            <span className="btn btn-primary btn-sm">View</span>
+                                            <div className="explore-actions">
+                                                <button
+                                                    className={`btn btn-sm ${addedToCart[photo.id]
+                                                        ? 'btn-success'
+                                                        : 'btn-primary'
+                                                        }`}
+                                                    onClick={(e) => handleAddToCart(photo, e)}
+                                                    disabled={addingToCart[photo.id]}
+                                                >
+                                                    {addingToCart[photo.id] ? (
+                                                        <>
+                                                            <svg className="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+                                                                <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                                                            </svg>
+                                                        </>
+                                                    ) : addedToCart[photo.id] ? (
+                                                        '✓ Added'
+                                                    ) : (
+                                                        <>
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ marginRight: '4px' }}>
+                                                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.6 4.4M17 13l1.6 4.4M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                            </svg>
+                                                            Add to Cart
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>

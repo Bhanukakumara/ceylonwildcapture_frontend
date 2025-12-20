@@ -83,8 +83,8 @@
 .form-input:focus {
     outline: none;
     background: rgba(255, 255, 255, 0.08);
-    border-color: var(--color-sunset-orange);
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .form-input::placeholder {
@@ -112,14 +112,14 @@
 }
 
 .link {
-    color: var(--color-sunset-orange);
+    color: var(--primary);
     text-decoration: none;
     font-size: 0.9rem;
     transition: color var(--transition-fast);
 }
 
 .link:hover {
-    color: var(--color-sunset-gold);
+    color: var(--primary-dark);
     text-decoration: underline;
 }
 
@@ -208,8 +208,8 @@
 }
 
 .progress-step.active .progress-circle {
-    background: linear-gradient(135deg, var(--color-sunset-orange) 0%, var(--color-sunset-gold) 100%);
-    border-color: var(--color-sunset-orange);
+    background: var(--gradient-primary);
+    border-color: var(--primary);
     color: var(--color-white);
 }
 
@@ -254,14 +254,14 @@
 
 .role-card:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 107, 53, 0.3);
+    border-color: rgba(16, 185, 129, 0.3);
     transform: translateY(-2px);
 }
 
 .role-card.active {
-    background: rgba(255, 107, 53, 0.1);
-    border-color: var(--color-sunset-orange);
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .role-icon {
