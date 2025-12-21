@@ -1,0 +1,64 @@
+.upload-zone {
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    background: var(--glass-overlay);
+}
+
+.upload-zone:hover {
+    border-color: var(--primary);
+    background: var(--glass-overlay-2);
+}
+
+.upload-zone svg {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.upload-zone h4 {
+    color: var(--heading);
+    margin-bottom: 0.5rem;
+}
+
+.upload-zone p {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.upload-preview {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.upload-preview img {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.file-info {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+}
+
+.photo-form {
+    margin-top: 2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

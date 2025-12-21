@@ -1,0 +1,174 @@
+.audit-logs-page {
+    max-width: 1800px;
+}
+
+/* Audit Type Badges */
+.audit-type-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.audit-type-badge.login {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.audit-type-badge.download {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.audit-type-badge.admin {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+}
+
+.audit-type-badge.payment {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+}
+
+.audit-type-badge.activity {
+    background: rgba(236, 72, 153, 0.2);
+    color: #f472b6;
+}
+
+.audit-type-badge.default {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+}
+
+/* User Cell */
+.user-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.admin-indicator {
+    font-size: 0.7rem;
+    color: #c084fc;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Action Cell */
+.action-cell {
+    font-weight: 600;
+    color: var(--color-white);
+    text-transform: capitalize;
+}
+
+/* Status Badges */
+.status-badge.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.status-badge.failure {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+/* Location Cell */
+.location-cell {
+    color: var(--color-light-gray);
+    font-size: 0.9rem;
+}
+
+/* Device Cell */
+.device-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.browser-info {
+    font-size: 0.75rem;
+    color: var(--color-gray);
+}
+
+/* IP Cell */
+.ip-cell {
+    font-family: 'Courier New', monospace;
+    color: var(--color-light-gray);
+    font-size: 0.9rem;
+}
+
+/* Audit Details Modal */
+.audit-modal {
+    max-width: 900px;
+}
+
+.audit-details-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.audit-info-section {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.audit-info-section.full-width {
+    grid-column: 1 / -1;
+}
+
+.audit-info-section h4 {
+    color: #6366f1;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.info-block {
+    margin-top: 1rem;
+}
+
+.info-block strong {
+    display: block;
+    color: var(--color-white);
+    margin-bottom: 0.5rem;
+}
+
+.info-block p {
+    color: var(--color-light-gray);
+    margin: 0;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid #6366f1;
+}
+
+.info-block.error p {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .audit-details-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-table-container {
+        overflow-x: auto;
+    }
+
+    .admin-table {
+        min-width: 1200px;
+    }
+}
