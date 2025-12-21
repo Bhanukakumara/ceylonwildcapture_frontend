@@ -4,24 +4,27 @@
 
 .photographers-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, max-content));
     gap: 2rem;
     margin-bottom: var(--spacing-2xl);
+    justify-content: center;
 }
 
 .photographer-card {
-    padding: 2rem;
+    padding: 1.25rem 1.5rem;
     border-radius: var(--radius-lg);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
     transition: all var(--transition-normal);
-    opacity: 0;
 }
 
 .photographer-avatar {
     position: relative;
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 1.5rem;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
 }
 
 .avatar-icon {
@@ -32,7 +35,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
+    font-size: 2rem;
     border: 3px solid rgba(255, 255, 255, 0.1);
     transition: all var(--transition-normal);
 }
@@ -60,31 +63,32 @@
 }
 
 .photographer-info {
-    margin-bottom: 1.5rem;
+    flex: 1;
+    text-align: left;
 }
 
 .photographer-name {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     color: var(--color-white);
 }
 
 .photographer-specialty {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: var(--color-light-gray);
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .photographer-stats {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
     background: rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-sm);
     color: var(--color-gray);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .photographer-stats svg {

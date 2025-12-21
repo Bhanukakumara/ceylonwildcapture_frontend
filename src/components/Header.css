@@ -227,7 +227,7 @@
     top: calc(100% + 0.5rem);
     right: 0;
     min-width: 240px;
-    background: var(--surface);
+    background: var(--color-dark);
     backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
     border-radius: var(--card-radius);
@@ -242,6 +242,7 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

@@ -1,24 +1,47 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { publicStatsApi } from '../services/api';
 import './Hero.css';
 
 const Hero = () => {
-    const [scrollY, setScrollY] = useState(0);
+    const [query, setQuery] = useState('');
+    const navigate = useNavigate();
+    const [stats, setStats] = useState({
+        photos: 10000,
+        photographers: 500,
+        species: 50
+    });
 
     useEffect(() => {
-        const handleScroll = () => {
-            setScrollY(window.scrollY);
+        const fetchStats = async () => {
+            try {
+                const data = await publicStatsApi.getStats();
+
+                setStats({
+                    photos: data.totalPhotos,
+                    photographers: data.totalPhotographers,
+                    species: data.totalCategories
+                });
+            } catch (error) {
+                console.error('Failed to fetch stats:', error);
+                // Keep default values on error
+            }
         };
 
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        fetchStats();
     }, []);
 
+    const handleSearch = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        if (query.trim()) {
+            navigate(`/explore?search=${encodeURIComponent(query.trim())}`);
+        } else {
+            navigate('/explore');
+        }
+    };
     return (
         <section className="hero" id="home">
-            <div
-                className="hero-background"
-                style={{ transform: `translateY(${scrollY * 0.5}px)` }}
-            >
+            <div className="hero-background">
                 <img
                     src="/src/assets/hero-elephant.png"
                     alt="Majestic elephant in golden hour"
@@ -38,32 +61,36 @@ const Hero = () => {
                             Every image tells a story of nature's magnificence.
                         </p>
 
-                        <div className="hero-search" data-aos="fade-up" data-aos-delay="200">
-                            <svg className="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-                                <path d="M16 16L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                            <input
-                                type="text"
-                                placeholder="Search for elephants, leopards, birds..."
-                                className="search-input"
-                            />
-                            <button className="btn btn-primary search-btn">Search</button>
-                        </div>
+                        <form className="hero-search" data-aos="fade-up" data-aos-delay="200" onSubmit={handleSearch}>
+                            <div className="search-input-wrapper">
+                                <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                                    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    placeholder="Search for elephants, leopards, birds..."
+                                    className="search-input"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                />
+                            </div>
+                            <button type="submit" className="btn btn-primary search-btn">Search</button>
+                        </form>
 
                         <div className="hero-stats" data-aos="fade-up" data-aos-delay="300">
                             <div className="stat">
-                                <div className="stat-number">10,000+</div>
+                                <div className="stat-number">{stats.photos.toLocaleString()}+</div>
                                 <div className="stat-label">Photos</div>
                             </div>
                             <div className="stat-divider"></div>
                             <div className="stat">
-                                <div className="stat-number">500+</div>
+                                <div className="stat-number">{stats.photographers}+</div>
                                 <div className="stat-label">Photographers</div>
                             </div>
                             <div className="stat-divider"></div>
                             <div className="stat">
-                                <div className="stat-number">50+</div>
+                                <div className="stat-number">{stats.species}+</div>
                                 <div className="stat-label">Species</div>
                             </div>
                         </div>
@@ -71,7 +98,7 @@ const Hero = () => {
                 </div>
             </div>
 
-            <div className="scroll-indicator animate-float">
+            <div className="scroll-indicator">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M12 5v14M12 19l-4-4M12 19l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>

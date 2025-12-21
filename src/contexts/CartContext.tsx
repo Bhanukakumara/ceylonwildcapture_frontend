@@ -34,10 +34,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     // Load cart from backend on mount
     useEffect(() => {
-        refreshCart();
+        // Only fetch cart if user is authenticated
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            refreshCart();
+        }
     }, []);
 
     const refreshCart = async () => {
+        // Check if user is authenticated before making API call
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            setItems([]);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);

@@ -30,15 +30,16 @@
     border-radius: var(--radius-lg);
     overflow: hidden;
     transition: all var(--transition-normal);
-    opacity: 0;
     text-decoration: none;
     display: block;
     color: inherit;
+    outline: none;
 }
 
 .photo-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-xl);
+    outline: none;
 }
 
 .photo-image-wrapper {
@@ -69,10 +70,6 @@
     justify-content: center;
     opacity: 0;
     transition: opacity var(--transition-normal);
-}
-
-.photo-card:hover .photo-overlay {
-    opacity: 1;
 }
 
 .photo-actions {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { photoApi, categoryApi, type Photo, type Category } from '../services/api';
 import { useCart } from '../contexts/CartContext';
 import './ExplorePage.css';
@@ -9,9 +9,11 @@ const ExplorePage = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchParams] = useSearchParams();
+    const initialSearch = searchParams.get('search') || '';
 
     // Filters
-    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [sortBy, setSortBy] = useState<string>('newest');
     const [currentPage, setCurrentPage] = useState(0);
@@ -28,6 +30,15 @@ const ExplorePage = () => {
     useEffect(() => {
         loadCategories();
     }, []);
+
+    // Sync search query from URL
+    useEffect(() => {
+        const queryParam = searchParams.get('search');
+        if (queryParam !== null) {
+            setSearchQuery(queryParam);
+            setCurrentPage(0);
+        }
+    }, [searchParams]);
 
     // Load photos when filters change (with debounce for search)
     useEffect(() => {

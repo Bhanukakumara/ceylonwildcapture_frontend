@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { logout } from '../services/api';
 import './AdminLayout.css';
@@ -43,7 +43,7 @@ const AdminLayout = () => {
     return (
         <div className="admin-layout">
             <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-                <div className="admin-sidebar-header">
+                <Link to="/" className="admin-sidebar-header">
                     <svg className="admin-logo" viewBox="0 0 40 40" fill="none">
                         <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
                         <path d="M20 10 L28 20 L20 30 L12 20 Z" fill="currentColor" />
@@ -54,7 +54,7 @@ const AdminLayout = () => {
                             <span className="admin-badge">Admin</span>
                         </div>
                     )}
-                </div>
+                </Link>
 
                 <nav className="admin-nav">
                     {adminMenuItems.map((item) => (

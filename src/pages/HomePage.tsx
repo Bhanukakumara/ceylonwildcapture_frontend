@@ -2,7 +2,6 @@ import Hero from '../components/Hero';
 import FeaturedPhotos from '../components/FeaturedPhotos';
 import Categories from '../components/Categories';
 import Photographers from '../components/Photographers';
-import CallToAction from '../components/CallToAction';
 
 const HomePage = () => {
     return (
@@ -11,7 +10,6 @@ const HomePage = () => {
             <FeaturedPhotos />
             <Categories />
             <Photographers />
-            <CallToAction />
         </>
     );
 };

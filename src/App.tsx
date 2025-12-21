@@ -20,6 +20,13 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import PhotoDetailPage from './pages/PhotoDetailPage';
 import OrdersPage from './pages/OrdersPage';
+import ContactPage from './pages/ContactPage';
+import FAQPage from './pages/FAQPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import CookiePolicyPage from './pages/CookiePolicyPage';
+import CopyrightPage from './pages/CopyrightPage';
+import AboutPage from './pages/AboutPage';
 
 // Auth Pages
 import LoginPage from './pages/auth/LoginPage';
@@ -68,8 +75,13 @@ function App() {
             <Route path="/photo/:id" element={<PhotoDetailPage />} />
             <Route path="/category/:name" element={<div className="page-placeholder">Category Page - Coming Soon</div>} />
             <Route path="/photographer/:id" element={<div className="page-placeholder">Photographer Profile - Coming Soon</div>} />
-            <Route path="/about" element={<div className="page-placeholder">About Page - Coming Soon</div>} />
-            <Route path="/contact" element={<div className="page-placeholder">Contact Page - Coming Soon</div>} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/cookies" element={<CookiePolicyPage />} />
+            <Route path="/copyright" element={<CopyrightPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={
               <ProtectedRoute>

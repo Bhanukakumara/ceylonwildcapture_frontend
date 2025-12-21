@@ -114,56 +114,22 @@ const Header = () => {
         <header className={`header ${scrolled ? 'scrolled' : ''}`}>
             <div className="container">
                 <nav className="nav">
-                    <div className="nav-brand">
+                    <Link to="/" className="nav-brand">
                         <svg className="logo-icon" viewBox="0 0 40 40" fill="none">
                             <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
                             <path d="M20 10 L28 20 L20 30 L12 20 Z" fill="currentColor" />
                         </svg>
                         <span className="brand-name">Ceylon Wild Capture</span>
-                    </div>
+                    </Link>
 
                     <ul className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
                         <li><Link to="/" className="nav-link">Home</Link></li>
                         <li><Link to="/explore" className="nav-link">Explore</Link></li>
-                        <li><Link to="/category/all" className="nav-link">Categories</Link></li>
-                        <li><Link to="/photographer/featured" className="nav-link">Photographers</Link></li>
                         <li><Link to="/about" className="nav-link">About</Link></li>
-                        <li><Link to="/admin/dashboard" className="nav-link admin-link">Admin</Link></li>
+                        <li><Link to="/contact" className="nav-link">Contact Us</Link></li>
                     </ul>
 
                     <div className="nav-actions">
-                        <div className="search-wrapper" ref={searchRef}>
-                            <button
-                                className="icon-btn"
-                                aria-label="Search"
-                                onClick={toggleSearch}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="2" />
-                                    <path d="M14 14L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                </svg>
-                            </button>
-
-                            {searchOpen && (
-                                <form onSubmit={handleSearchSubmit} className="search-dropdown">
-                                    <input
-                                        ref={searchInputRef}
-                                        type="text"
-                                        className="search-input"
-                                        placeholder="Search photos, photographers..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                    <button type="submit" className="search-submit-btn" aria-label="Submit search">
-                                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                                            <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="2" />
-                                            <path d="M14 14L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                        </svg>
-                                    </button>
-                                </form>
-                            )}
-                        </div>
-
                         {isAuthenticated && (
                             <Link to="/cart" className="icon-btn cart-btn" aria-label="Cart">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -216,6 +182,35 @@ const Header = () => {
                                             </svg>
                                             <span>My Orders</span>
                                         </Link>
+                                        {user?.role === 'ADMIN' && (
+                                            <Link
+                                                to="/admin/dashboard"
+                                                className="profile-dropdown-item"
+                                                onClick={() => setProfileMenuOpen(false)}
+                                            >
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                                <span>Admin Dashboard</span>
+                                            </Link>
+                                        )}
+                                        {user?.role === 'PHOTOGRAPHER' && (
+                                            <Link
+                                                to="/photographer/dashboard"
+                                                className="profile-dropdown-item"
+                                                onClick={() => setProfileMenuOpen(false)}
+                                            >
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                    <rect x="2" y="6" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+                                                    <circle cx="12" cy="13" r="3" stroke="currentColor" strokeWidth="2" />
+                                                    <path d="M7 6L9 2h6l2 4" stroke="currentColor" strokeWidth="2" />
+                                                </svg>
+                                                <span>Photographer Dashboard</span>
+                                            </Link>
+                                        )}
                                         <Link
                                             to="/settings"
                                             className="profile-dropdown-item"

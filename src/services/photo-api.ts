@@ -11,6 +11,8 @@ export interface Photo {
     imageUrl: string;
     thumbnailUrl: string;
     watermarkedUrl?: string;
+    photographerId?: number;
+    photographerName?: string;
     photographer?: {
         id: number;
         firstName: string;
@@ -42,8 +44,8 @@ export interface Photo {
     captureDate?: string;
     createdAt: string;
     updatedAt?: string;
-    tags?: Tag[];
-    categories?: Category[];
+    tags?: Tag[] | null;
+    categories?: Category[] | null | string;
 }
 
 export interface Category {
@@ -734,6 +736,43 @@ export const tagApi = {
      */
     getTagByName: async (name: string): Promise<Tag> => {
         const response = await apiClient.get(`/v1/tags/name/${name}`);
+        return response.data;
+    },
+};
+
+// ============================================================================
+// Public Stats API
+// ============================================================================
+
+export interface PublicStats {
+    totalPhotos: number;
+    totalPhotographers: number;
+    totalCategories: number;
+}
+
+export interface TopPhotographer {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImageUrl: string | null;
+    photoCount: number;
+}
+
+export const publicStatsApi = {
+    /**
+     * Get public platform statistics (no authentication required)
+     */
+    getStats: async (): Promise<PublicStats> => {
+        const response = await apiClient.get('/v1/public/stats');
+        return response.data;
+    },
+
+    /**
+     * Get top photographers by photo count (no authentication required)
+     */
+    getTopPhotographers: async (limit: number = 4): Promise<TopPhotographer[]> => {
+        const response = await apiClient.get(`/v1/public/stats/top-photographers?limit=${limit}`);
         return response.data;
     },
 };

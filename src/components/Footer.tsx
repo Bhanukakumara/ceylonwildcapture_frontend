@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -41,10 +42,10 @@ const Footer = () => {
                     <div className="footer-section">
                         <h4 className="footer-heading">Quick Links</h4>
                         <ul className="footer-links">
-                            <li><a href="#explore">Explore Photos</a></li>
+                            <li><Link to="/explore">Explore Photos</Link></li>
                             <li><a href="#categories">Categories</a></li>
                             <li><a href="#photographers">Photographers</a></li>
-                            <li><a href="#about">About Us</a></li>
+                            <li><Link to="/about">About Us</Link></li>
                         </ul>
                     </div>
 
@@ -52,10 +53,8 @@ const Footer = () => {
                     <div className="footer-section">
                         <h4 className="footer-heading">Support</h4>
                         <ul className="footer-links">
-                            <li><a href="#">Help Center</a></li>
-                            <li><a href="#">Contact Us</a></li>
-                            <li><a href="#">Licensing</a></li>
-                            <li><a href="#">FAQ</a></li>
+                            <li><Link to="/contact">Contact Us</Link></li>
+                            <li><Link to="/faq">FAQ</Link></li>
                         </ul>
                     </div>
 
@@ -63,10 +62,10 @@ const Footer = () => {
                     <div className="footer-section">
                         <h4 className="footer-heading">Legal</h4>
                         <ul className="footer-links">
-                            <li><a href="#">Terms of Service</a></li>
-                            <li><a href="#">Privacy Policy</a></li>
-                            <li><a href="#">Cookie Policy</a></li>
-                            <li><a href="#">Copyright</a></li>
+                            <li><Link to="/terms">Terms of Service</Link></li>
+                            <li><Link to="/privacy">Privacy Policy</Link></li>
+                            <li><Link to="/cookies">Cookie Policy</Link></li>
+                            <li><Link to="/copyright">Copyright</Link></li>
                         </ul>
                     </div>
                 </div>
@@ -76,7 +75,7 @@ const Footer = () => {
                         © 2024 Ceylon Wild Capture. All rights reserved.
                     </p>
                     <p className="footer-tagline">
-                        Made with ❤️ for wildlife conservation
+                        Made by Bhanuka Kumara
                     </p>
                 </div>
             </div>
