@@ -50,7 +50,7 @@ const AdminDashboardPage = () => {
     const pendingActions = [
         { type: 'photos', count: 23, label: 'Photos pending approval', link: '/admin/photos?status=PENDING' },
         { type: 'payouts', count: 12, label: 'Payouts pending review', link: '/admin/payouts' },
-        { type: 'orders', count: 5, label: 'Orders in processing', link: '/admin/sales?status=PROCESSING' },
+        { type: 'orders', count: 5, label: 'Orders in processing', link: '/admin/orders?status=PROCESSING' },
         { type: 'photographers', count: 8, label: 'Photographers awaiting verification', link: '/admin/photographers' }
     ];
 
@@ -171,7 +171,7 @@ const AdminDashboardPage = () => {
                                         <div className="category-info">
                                             <div className="category-name">{category.categoryName}</div>
                                             <div className="category-stats">
-                                                {category.photoCount} photos • {category.salesCount} sales
+                                                {category.photoCount} photos • {category.salesCount} orders
                                             </div>
                                         </div>
                                         <div className="category-revenue">{formatCurrency(category.totalRevenue)}</div>
@@ -234,7 +234,7 @@ const AdminDashboardPage = () => {
                                 <span className="action-icon">📸</span>
                                 <span>Review Photos</span>
                             </Link>
-                            <Link to="/admin/sales" className="quick-action-btn">
+                            <Link to="/admin/orders" className="quick-action-btn">
                                 <span className="action-icon">🛒</span>
                                 <span>View Orders</span>
                             </Link>

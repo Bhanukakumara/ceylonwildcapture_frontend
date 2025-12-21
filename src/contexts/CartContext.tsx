@@ -8,7 +8,7 @@ export interface CartItem {
     photoTitle: string;
     photoImageUrl: string;
     photographerName: string;
-    license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED';
+    license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL';
     price: number;
     addedAt: string;
 }
@@ -17,7 +17,7 @@ interface CartContextType {
     items: CartItem[];
     loading: boolean;
     error: string | null;
-    addToCart: (photoId: number, photoTitle: string, photoImageUrl: string, photographerName: string, license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED', price: number) => Promise<void>;
+    addToCart: (photoId: number, photoTitle: string, photoImageUrl: string, photographerName: string, license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL', price: number) => Promise<void>;
     removeFromCart: (cartItemId: number) => Promise<void>;
     clearCart: () => Promise<void>;
     getTotalPrice: () => number;
@@ -85,7 +85,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         photoTitle: string,
         photoImageUrl: string,
         photographerName: string,
-        license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED',
+        license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL',
         price: number
     ) => {
         try {

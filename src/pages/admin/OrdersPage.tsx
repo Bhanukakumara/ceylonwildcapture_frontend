@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import adminApi from '../../services/admin-api';
+import type { OrderStats, OrderSummary } from '../../services/admin-api';
 import '../dashboard/Dashboard.css';
 import './AdminDashboard.css';
 import './OrdersPage.css';
@@ -21,12 +23,9 @@ interface OrderItem {
 interface Order {
     id: number;
     orderNumber: string;
-    buyer: {
-        id: number;
-        name: string;
-        email: string;
-        username: string;
-    };
+    buyerId: number;
+    buyerName: string;
+    buyerEmail: string;
     totalAmount: number;
     subtotal: number;
     taxAmount: number;
@@ -38,9 +37,15 @@ interface Order {
     transactionId?: string;
     billingName: string;
     billingEmail: string;
-    billingAddress?: string;
-    billingCity?: string;
-    billingCountry?: string;
+    billingInfo?: {
+        billingName: string;
+        billingEmail: string;
+        billingAddress?: string;
+        billingCity?: string;
+        billingState?: string;
+        billingCountry?: string;
+        billingZip?: string;
+    };
     itemCount: number;
     items?: OrderItem[];
     createdAt: string;
@@ -58,147 +63,40 @@ const OrdersPage = () => {
     const [newStatus, setNewStatus] = useState<OrderStatus>('PROCESSING');
     const [statusNotes, setStatusNotes] = useState('');
 
-    // Mock data - replace with API calls
-    const mockOrders: Order[] = [
-        {
-            id: 1,
-            orderNumber: 'ORD-2024-001234',
-            buyer: {
-                id: 1,
-                name: 'John Doe',
-                email: 'john.doe@example.com',
-                username: 'johndoe'
-            },
-            totalAmount: 200.00,
-            subtotal: 200.00,
-            taxAmount: 0.00,
-            discountAmount: 0.00,
-            status: 'COMPLETED',
-            paymentMethod: 'Credit Card',
-            paymentId: 'pi_3abc123xyz',
-            transactionId: 'txn_abc123',
-            billingName: 'John Doe',
-            billingEmail: 'john.doe@example.com',
-            billingAddress: '123 Main St',
-            billingCity: 'Colombo',
-            billingCountry: 'Sri Lanka',
-            itemCount: 2,
-            items: [
-                {
-                    id: 1,
-                    photoId: 123,
-                    photoTitle: 'Sri Lankan Leopard in Yala',
-                    photoThumbnail: '/api/placeholder/100/75',
-                    licenseType: 'COMMERCIAL',
-                    price: 150.00,
-                    discount: 0,
-                    finalPrice: 150.00,
-                    photographerName: 'Jane Smith'
-                },
-                {
-                    id: 2,
-                    photoId: 456,
-                    photoTitle: 'Asian Elephant Herd',
-                    photoThumbnail: '/api/placeholder/100/75',
-                    licenseType: 'BASE',
-                    price: 50.00,
-                    discount: 0,
-                    finalPrice: 50.00,
-                    photographerName: 'Mike Johnson'
-                }
-            ],
-            createdAt: '2024-12-01T10:30:00',
-            completedAt: '2024-12-01T10:35:00'
-        },
-        {
-            id: 2,
-            orderNumber: 'ORD-2024-001235',
-            buyer: {
-                id: 2,
-                name: 'Jane Smith',
-                email: 'jane.smith@example.com',
-                username: 'janesmith'
-            },
-            totalAmount: 150.00,
-            subtotal: 150.00,
-            taxAmount: 0.00,
-            discountAmount: 0.00,
-            status: 'PENDING',
-            billingName: 'Jane Smith',
-            billingEmail: 'jane.smith@example.com',
-            billingCity: 'Kandy',
-            billingCountry: 'Sri Lanka',
-            itemCount: 1,
-            createdAt: '2024-12-10T14:20:00'
-        },
-        {
-            id: 3,
-            orderNumber: 'ORD-2024-001236',
-            buyer: {
-                id: 3,
-                name: 'Mike Johnson',
-                email: 'mike.johnson@example.com',
-                username: 'mikejohnson'
-            },
-            totalAmount: 275.00,
-            subtotal: 300.00,
-            taxAmount: 0.00,
-            discountAmount: 25.00,
-            couponCode: 'SUMMER2024',
-            status: 'PROCESSING',
-            paymentMethod: 'PayPal',
-            billingName: 'Mike Johnson',
-            billingEmail: 'mike.johnson@example.com',
-            billingCity: 'Galle',
-            billingCountry: 'Sri Lanka',
-            itemCount: 3,
-            createdAt: '2024-12-08T09:15:00'
-        },
-        {
-            id: 4,
-            orderNumber: 'ORD-2024-001237',
-            buyer: {
-                id: 1,
-                name: 'John Doe',
-                email: 'john.doe@example.com',
-                username: 'johndoe'
-            },
-            totalAmount: 75.00,
-            subtotal: 75.00,
-            taxAmount: 0.00,
-            discountAmount: 0.00,
-            status: 'CANCELLED',
-            billingName: 'John Doe',
-            billingEmail: 'john.doe@example.com',
-            billingCity: 'Colombo',
-            billingCountry: 'Sri Lanka',
-            itemCount: 1,
-            createdAt: '2024-12-05T16:45:00',
-            cancelledAt: '2024-12-05T17:00:00'
-        }
-    ];
+    const [orders, setOrders] = useState<OrderSummary[]>([]);
+    const [orderStats, setOrderStats] = useState<OrderStats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
 
-    const stats = {
-        totalOrders: 1547,
-        pendingOrders: 23,
-        processingOrders: 5,
-        completedOrders: 1500,
-        cancelledOrders: 15,
-        refundedOrders: 4,
-        totalRevenue: 125000.50,
-        averageOrderValue: 80.85
+    useEffect(() => {
+        fetchStats();
+        fetchOrders();
+    }, [currentPage, statusFilter]);
+
+    const fetchStats = async () => {
+        try {
+            const data = await adminApi.getOrderStats();
+            setOrderStats(data);
+        } catch (error) {
+            console.error('Error fetching order stats:', error);
+        }
     };
 
-    const filteredOrders = mockOrders.filter(order => {
-        const matchesSearch = searchTerm === '' ||
-            order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.buyer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.buyer.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
-    });
+    const fetchOrders = async () => {
+        setLoading(true);
+        try {
+            const data = await adminApi.getOrders(currentPage, 10);
+            setOrders(data.content);
+            setTotalPages(Math.ceil(data.totalElements / 10)); // Backend might return totalPages too
+            setTotalElements(data.totalElements);
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -214,15 +112,15 @@ const OrdersPage = () => {
         return `$${amount.toFixed(2)}`;
     };
 
-    const getStatusColor = (status: OrderStatus) => {
-        const colors = {
+    const getStatusColor = (status: string) => {
+        const colors: { [key: string]: string } = {
             PENDING: 'pending',
             PROCESSING: 'processing',
             COMPLETED: 'completed',
             CANCELLED: 'cancelled',
             REFUNDED: 'refunded'
         };
-        return colors[status];
+        return colors[status] || 'pending';
     };
 
     const getLicenseTypeLabel = (type: LicenseType) => {
@@ -235,30 +133,45 @@ const OrdersPage = () => {
         return labels[type];
     };
 
-    const handleViewDetails = (order: Order) => {
-        setSelectedOrder(order);
-        setShowDetailsModal(true);
+    const handleViewDetails = async (orderId: number) => {
+        try {
+            const data = await adminApi.getOrderDetails(orderId);
+            setSelectedOrder(data);
+            setShowDetailsModal(true);
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+        }
     };
 
-    const handleUpdateStatus = (order: Order) => {
+    const handleUpdateStatus = (order: any) => {
         setSelectedOrder(order);
         setNewStatus(order.status);
         setShowStatusModal(true);
     };
 
-    const confirmUpdateStatus = () => {
+    const confirmUpdateStatus = async () => {
         if (selectedOrder) {
-            console.log('Update order status:', selectedOrder.id, newStatus, statusNotes);
-            // API call: PUT /api/v1/orders/{orderId}/status
-            setShowStatusModal(false);
-            setStatusNotes('');
+            try {
+                await adminApi.updateOrderStatus(selectedOrder.id, newStatus, statusNotes);
+                setShowStatusModal(false);
+                setStatusNotes('');
+                fetchOrders();
+                fetchStats();
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
         }
     };
 
-    const handleCancelOrder = (order: Order) => {
+    const handleCancelOrder = async (order: any) => {
         if (confirm(`Are you sure you want to cancel order ${order.orderNumber}?`)) {
-            console.log('Cancel order:', order.id);
-            // API call: POST /api/v1/orders/{orderId}/cancel
+            try {
+                await adminApi.updateOrderStatus(order.id, 'CANCELLED');
+                fetchOrders();
+                fetchStats();
+            } catch (error) {
+                console.error('Error cancelling order:', error);
+            }
         }
     };
 
@@ -275,38 +188,32 @@ const OrdersPage = () => {
             <div className="stats-grid">
                 <div className="stat-card glass admin-stat-card">
                     <div className="stat-content">
-                        <div className="stat-value">{stats.totalOrders.toLocaleString()}</div>
+                        <div className="stat-value">{orderStats?.totalOrders.toLocaleString() || 0}</div>
                         <div className="stat-label">Total Orders</div>
                     </div>
                 </div>
                 <div className="stat-card glass admin-stat-card pending">
                     <div className="stat-content">
-                        <div className="stat-value">{stats.pendingOrders}</div>
+                        <div className="stat-value">{orderStats?.pendingOrders || 0}</div>
                         <div className="stat-label">Pending</div>
                     </div>
                 </div>
                 <div className="stat-card glass admin-stat-card processing">
                     <div className="stat-content">
-                        <div className="stat-value">{stats.processingOrders}</div>
+                        <div className="stat-value">{orderStats?.processingOrders || 0}</div>
                         <div className="stat-label">Processing</div>
                     </div>
                 </div>
                 <div className="stat-card glass admin-stat-card">
                     <div className="stat-content">
-                        <div className="stat-value">{stats.completedOrders.toLocaleString()}</div>
+                        <div className="stat-value">{orderStats?.completedOrders.toLocaleString() || 0}</div>
                         <div className="stat-label">Completed</div>
                     </div>
                 </div>
                 <div className="stat-card glass admin-stat-card">
                     <div className="stat-content">
-                        <div className="stat-value">{formatCurrency(stats.totalRevenue)}</div>
+                        <div className="stat-value">{formatCurrency(orderStats?.totalRevenue || 0)}</div>
                         <div className="stat-label">Total Revenue</div>
-                    </div>
-                </div>
-                <div className="stat-card glass admin-stat-card">
-                    <div className="stat-content">
-                        <div className="stat-value">{formatCurrency(stats.averageOrderValue)}</div>
-                        <div className="stat-label">Avg Order Value</div>
                     </div>
                 </div>
             </div>
@@ -351,76 +258,86 @@ const OrdersPage = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredOrders.map((order) => (
-                                <tr key={order.id}>
-                                    <td>
-                                        <div className="order-number-cell">
-                                            <span className="order-number">{order.orderNumber}</span>
-                                            {order.couponCode && (
-                                                <span className="coupon-badge">🎟️ {order.couponCode}</span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="buyer-cell">
-                                            <div className="buyer-name">{order.buyer.name}</div>
-                                            <div className="buyer-email">{order.buyer.email}</div>
-                                        </div>
-                                    </td>
-                                    <td className="items-cell">{order.itemCount} item{order.itemCount > 1 ? 's' : ''}</td>
-                                    <td className="amount-cell">
-                                        <div className="amount-main">{formatCurrency(order.totalAmount)}</div>
-                                        {order.discountAmount > 0 && (
-                                            <div className="amount-discount">-{formatCurrency(order.discountAmount)}</div>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <span className={`status-badge ${getStatusColor(order.status)}`}>
-                                            {order.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {order.paymentMethod ? (
-                                            <div className="payment-cell">
-                                                <div>{order.paymentMethod}</div>
-                                                {order.transactionId && (
-                                                    <div className="transaction-id">{order.transactionId}</div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <span className="no-payment">Not paid</span>
-                                        )}
-                                    </td>
-                                    <td className="date-cell">{formatDate(order.createdAt)}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <button
-                                                className="action-btn"
-                                                title="View Details"
-                                                onClick={() => handleViewDetails(order)}
-                                            >
-                                                👁️
-                                            </button>
-                                            <button
-                                                className="action-btn"
-                                                title="Update Status"
-                                                onClick={() => handleUpdateStatus(order)}
-                                            >
-                                                🔄
-                                            </button>
-                                            {(order.status === 'PENDING' || order.status === 'PROCESSING') && (
-                                                <button
-                                                    className="action-btn danger"
-                                                    title="Cancel Order"
-                                                    onClick={() => handleCancelOrder(order)}
-                                                >
-                                                    ✗
-                                                </button>
-                                            )}
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}>
+                                        <div className="loading-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                                            <div className="loading-spinner"></div>
+                                            <p>Loading orders...</p>
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            ) : orders.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-light-gray)' }}>
+                                        No orders found matching your criteria.
+                                    </td>
+                                </tr>
+                            ) : (
+                                orders.map((order) => (
+                                    <tr key={order.id}>
+                                        <td>
+                                            <div className="order-number-cell">
+                                                <span className="order-number">{order.orderNumber}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="buyer-cell">
+                                                <div className="buyer-name">{order.buyerName}</div>
+                                                <div className="buyer-email">{order.buyerEmail}</div>
+                                            </div>
+                                        </td>
+                                        <td className="items-cell">{order.itemCount} item{order.itemCount > 1 ? 's' : ''}</td>
+                                        <td className="amount-cell">
+                                            <div className="amount-main">{formatCurrency(order.totalAmount)}</div>
+                                        </td>
+                                        <td>
+                                            <span className={`status-badge ${getStatusColor(order.status)}`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {order.paymentMethod ? (
+                                                <div className="payment-cell">
+                                                    <div>{order.paymentMethod}</div>
+                                                    {order.transactionId && (
+                                                        <div className="transaction-id">{order.transactionId}</div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="no-payment">Not paid</span>
+                                            )}
+                                        </td>
+                                        <td className="date-cell">{formatDate(order.createdAt)}</td>
+                                        <td>
+                                            <div className="table-actions">
+                                                <button
+                                                    className="action-btn"
+                                                    title="View Details"
+                                                    onClick={() => handleViewDetails(order.id)}
+                                                >
+                                                    👁️
+                                                </button>
+                                                <button
+                                                    className="action-btn"
+                                                    title="Update Status"
+                                                    onClick={() => handleUpdateStatus(order)}
+                                                >
+                                                    🔄
+                                                </button>
+                                                {(order.status === 'PENDING' || order.status === 'PROCESSING') && (
+                                                    <button
+                                                        className="action-btn danger"
+                                                        title="Cancel Order"
+                                                        onClick={() => handleCancelOrder(order)}
+                                                    >
+                                                        ✗
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )))}
                         </tbody>
                     </table>
                 </div>
@@ -428,14 +345,32 @@ const OrdersPage = () => {
                 {/* Pagination */}
                 <div className="table-pagination">
                     <div className="pagination-info">
-                        Showing {filteredOrders.length} of {mockOrders.length} orders
+                        Showing {orders.length} of {totalElements} orders
                     </div>
                     <div className="pagination-controls">
-                        <button className="btn btn-ghost btn-sm">Previous</button>
-                        <button className="btn btn-ghost btn-sm active">1</button>
-                        <button className="btn btn-ghost btn-sm">2</button>
-                        <button className="btn btn-ghost btn-sm">3</button>
-                        <button className="btn btn-ghost btn-sm">Next</button>
+                        <button
+                            className="btn btn-ghost btn-sm"
+                            disabled={currentPage === 0}
+                            onClick={() => setCurrentPage(prev => prev - 1)}
+                        >
+                            Previous
+                        </button>
+                        {[...Array(Math.max(0, totalPages || 0))].map((_, i) => (
+                            <button
+                                key={i}
+                                className={`btn btn-ghost btn-sm ${currentPage === i ? 'active' : ''}`}
+                                onClick={() => setCurrentPage(i)}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                        <button
+                            className="btn btn-ghost btn-sm"
+                            disabled={currentPage === totalPages - 1 || totalPages === 0}
+                            onClick={() => setCurrentPage(prev => prev + 1)}
+                        >
+                            Next
+                        </button>
                     </div>
                 </div>
             </div>
@@ -464,20 +399,19 @@ const OrdersPage = () => {
                                 <div className="order-info-section">
                                     <h4>Buyer Information</h4>
                                     <div className="detail-grid">
-                                        <div><strong>Name:</strong> {selectedOrder.buyer.name}</div>
-                                        <div><strong>Email:</strong> {selectedOrder.buyer.email}</div>
-                                        <div><strong>Username:</strong> @{selectedOrder.buyer.username}</div>
+                                        <div><strong>Name:</strong> {selectedOrder.buyerName}</div>
+                                        <div><strong>Email:</strong> {selectedOrder.buyerEmail}</div>
                                     </div>
                                 </div>
 
                                 <div className="order-info-section">
                                     <h4>Billing Information</h4>
                                     <div className="detail-grid">
-                                        <div><strong>Name:</strong> {selectedOrder.billingName}</div>
-                                        <div><strong>Email:</strong> {selectedOrder.billingEmail}</div>
-                                        {selectedOrder.billingAddress && <div><strong>Address:</strong> {selectedOrder.billingAddress}</div>}
-                                        {selectedOrder.billingCity && <div><strong>City:</strong> {selectedOrder.billingCity}</div>}
-                                        {selectedOrder.billingCountry && <div><strong>Country:</strong> {selectedOrder.billingCountry}</div>}
+                                        <div><strong>Name:</strong> {selectedOrder.billingInfo?.billingName}</div>
+                                        <div><strong>Email:</strong> {selectedOrder.billingInfo?.billingEmail}</div>
+                                        {selectedOrder.billingInfo?.billingAddress && <div><strong>Address:</strong> {selectedOrder.billingInfo.billingAddress}</div>}
+                                        {selectedOrder.billingInfo?.billingCity && <div><strong>City:</strong> {selectedOrder.billingInfo.billingCity}</div>}
+                                        {selectedOrder.billingInfo?.billingCountry && <div><strong>Country:</strong> {selectedOrder.billingInfo.billingCountry}</div>}
                                     </div>
                                 </div>
 
@@ -522,9 +456,9 @@ const OrdersPage = () => {
                                     <div className="order-info-section full-width">
                                         <h4>Order Items ({selectedOrder.itemCount})</h4>
                                         <div className="order-items-list">
-                                            {selectedOrder.items.map((item) => (
+                                            {selectedOrder.items.map((item: any) => (
                                                 <div key={item.id} className="order-item-card">
-                                                    <img src={item.photoThumbnail} alt={item.photoTitle} className="item-thumbnail" />
+                                                    <img src={item.photoThumbnailUrl} alt={item.photoTitle} className="item-thumbnail" />
                                                     <div className="item-details">
                                                         <div className="item-title">{item.photoTitle}</div>
                                                         <div className="item-meta">by {item.photographerName}</div>

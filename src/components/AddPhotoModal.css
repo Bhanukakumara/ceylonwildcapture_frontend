@@ -62,3 +62,15 @@
         grid-template-columns: 1fr;
     }
 }
+
+.form-divider {
+    grid-column: 1 / -1;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    margin: 1.5rem 0 0.8rem 0;
+}

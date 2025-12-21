@@ -27,7 +27,7 @@ const AdminLayout = () => {
         { path: '/admin/photographers', label: 'Photographers', icon: '👨‍🎨' },
         { path: '/admin/photos', label: 'Photos', icon: '🖼️' },
         { path: '/admin/categories', label: 'Categories', icon: '📁' },
-        { path: '/admin/sales', label: 'Sales', icon: '💰' },
+        { path: '/admin/orders', label: 'Orders', icon: '�' },
         { path: '/admin/analytics', label: 'Analytics', icon: '📈' },
         { path: '/admin/audit-logs', label: 'Audit Logs', icon: '📋' },
         { path: '/admin/settings', label: 'Settings', icon: '⚙️' },

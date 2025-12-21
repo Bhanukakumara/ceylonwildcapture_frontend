@@ -28,6 +28,7 @@ export interface OrderItem {
     photoId: number;
     photoTitle: string;
     photoThumbnailUrl: string;
+    photoOriginalUrl?: string;
     photographerId: number;
     photographerName: string;
     licenseType: string;
