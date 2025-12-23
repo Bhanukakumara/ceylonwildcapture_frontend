@@ -8,7 +8,7 @@ export interface CartItem {
     photoThumbnailUrl: string;
     photographerName: string;
     photographerId: number;
-    licenseType: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED';
+    licenseType: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL';
     price: number;
     addedAt: string;
 }
@@ -23,7 +23,7 @@ export interface CartResponse {
 
 export interface AddToCartRequest {
     photoId: number;
-    licenseType: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED';
+    licenseType: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL';
 }
 
 export const cartApi = {

@@ -258,24 +258,6 @@ const PhotosPage = () => {
                         <div className="stat-label">Approved</div>
                     </div>
                 </div>
-                <div className="stat-card glass admin-stat-card">
-                    <div className="stat-content">
-                        <div className="stat-value">{stats.featured}</div>
-                        <div className="stat-label">Featured</div>
-                    </div>
-                </div>
-                <div className="stat-card glass admin-stat-card">
-                    <div className="stat-content">
-                        <div className="stat-value">{(stats.totalViews / 1000).toFixed(1)}K</div>
-                        <div className="stat-label">Total Views</div>
-                    </div>
-                </div>
-                <div className="stat-card glass admin-stat-card">
-                    <div className="stat-content">
-                        <div className="stat-value">{(stats.totalDownloads / 1000).toFixed(1)}K</div>
-                        <div className="stat-label">Total Downloads</div>
-                    </div>
-                </div>
             </div>
 
             {/* Filters */}
@@ -555,9 +537,15 @@ const PhotosPage = () => {
                                     <div className="detail-section">
                                         <h4>Categories</h4>
                                         <div className="tags-list">
-                                            {selectedPhoto.categories?.map((cat) => (
-                                                <span key={cat.id} className="category-tag">{cat.name}</span>
-                                            )) || <span>No categories</span>}
+                                            {Array.isArray(selectedPhoto.categories) ? (
+                                                selectedPhoto.categories.map((cat) => (
+                                                    <span key={cat.id} className="category-tag">{cat.name}</span>
+                                                ))
+                                            ) : typeof selectedPhoto.categories === 'string' ? (
+                                                <span className="category-tag">{selectedPhoto.categories}</span>
+                                            ) : (
+                                                <span>No categories</span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

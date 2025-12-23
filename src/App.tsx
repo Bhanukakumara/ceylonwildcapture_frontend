@@ -45,6 +45,7 @@ import PhotosPage from './pages/admin/PhotosPage';
 import CategoriesPage from './pages/admin/CategoriesPage';
 import AdminOrdersPage from './pages/admin/OrdersPage';
 import AuditLogsPage from './pages/admin/AuditLogsPage';
+import ReportsPage from './pages/admin/ReportsPage';
 
 // Protected Route
 import ProtectedRoute from './components/ProtectedRoute';
@@ -149,8 +150,9 @@ function App() {
             <Route path="/admin/photographers" element={<div className="dashboard-overview"><h2>Photographer Management</h2><p className="page-subtitle">Coming Soon</p></div>} />
             <Route path="/admin/photos" element={<PhotosPage />} />
             <Route path="/admin/categories" element={<CategoriesPage />} />
-            <Route path="/admin/sales" element={<AdminOrdersPage />} />
+            <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route path="/admin/analytics" element={<div className="dashboard-overview"><h2>Analytics & Reports</h2><p className="page-subtitle">Coming Soon</p></div>} />
+            <Route path="/admin/reports" element={<ReportsPage />} />
             <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
             <Route path="/admin/settings" element={<div className="dashboard-overview"><h2>Admin Settings</h2><p className="page-subtitle">Coming Soon</p></div>} />
           </Route>

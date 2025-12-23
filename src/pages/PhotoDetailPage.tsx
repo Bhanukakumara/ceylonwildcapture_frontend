@@ -5,7 +5,7 @@ import { useCart } from '../contexts/CartContext';
 import './PhotoDetailPage.css';
 
 interface LicenseOption {
-    type: 'personal' | 'commercial' | 'extended';
+    type: 'personal' | 'commercial' | 'extended' | 'editorial';
     name: string;
     price: number;
     description: string;
@@ -21,7 +21,7 @@ const PhotoDetailPage = () => {
     const [relatedPhotos, setRelatedPhotos] = useState<Photo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedLicense, setSelectedLicense] = useState<'personal' | 'commercial' | 'extended'>('personal');
+    const [selectedLicense, setSelectedLicense] = useState<'personal' | 'commercial' | 'extended' | 'editorial'>('personal');
     const [isZoomed, setIsZoomed] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -42,8 +42,9 @@ const PhotoDetailPage = () => {
             setPhoto(photoData);
 
             // Fetch related photos from same category
-            if (photoData.categories && photoData.categories.length > 0) {
-                const categorySlug = photoData.categories[0].slug;
+            if (photoData.categories && Array.isArray(photoData.categories) && photoData.categories.length > 0) {
+                const firstCategory = photoData.categories[0];
+                const categorySlug = typeof firstCategory === 'string' ? firstCategory : firstCategory.slug;
                 const relatedResponse = await photoApi.getPhotosByCategory(categorySlug, 0, 4);
                 // Filter out current photo from related
                 const filtered = relatedResponse.content.filter(p => p.id !== photoId);
@@ -62,56 +63,37 @@ const PhotoDetailPage = () => {
         }
     };
 
-    const licenseOptions: LicenseOption[] = [
-        {
-            type: 'personal',
-            name: 'Personal Use',
-            price: 49.99,
-            description: 'For personal projects and non-commercial use',
-            features: [
-                'High resolution download',
-                'Personal website use',
-                'Social media sharing',
-                'Print for personal use',
-                'Lifetime access',
-            ],
-        },
-        {
-            type: 'commercial',
-            name: 'Commercial Use',
-            price: 99.99,
-            description: 'For business and commercial projects',
-            features: [
-                'All personal features',
-                'Commercial website use',
-                'Marketing materials',
-                'Product packaging',
-                'Up to 500,000 impressions',
-            ],
-        },
-        {
-            type: 'extended',
-            name: 'Extended License',
-            price: 249.99,
-            description: 'Unlimited commercial rights',
-            features: [
-                'All commercial features',
-                'Unlimited impressions',
-                'Merchandise for resale',
-                'Digital templates',
-                'Priority support',
-            ],
-        },
-    ];
+    // Dynamic License Options based on photo data
+    const getLicenseOptions = (): LicenseOption[] => {
+        if (!photo) return [];
 
-    const selectedOption = licenseOptions.find(opt => opt.type === selectedLicense)!;
+        const options: LicenseOption[] = [
+            {
+                type: 'personal',
+                name: 'Personal Use',
+                price: photo.basePrice,
+                description: 'For personal projects and non-commercial use',
+                features: [
+                    'High resolution download',
+                    'Personal website use',
+                    'Social media sharing',
+                    'Print for personal use',
+                    'Lifetime access',
+                ],
+            },
+        ];
+        return options;
+    };
+
+    const licenseOptions = getLicenseOptions();
+    const selectedOption = licenseOptions.find(opt => opt.type === selectedLicense) || licenseOptions[0];
 
     const handleAddToCart = async () => {
         if (!photo) return;
 
         try {
             // Convert license type to uppercase for backend
-            const backendLicenseType = selectedLicense.toUpperCase() as 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED';
+            const backendLicenseType = selectedLicense.toUpperCase() as 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL';
 
             await addToCart(
                 photo.id,
@@ -165,6 +147,7 @@ const PhotoDetailPage = () => {
         if (photo.aperture) parts.push(`f/${photo.aperture}`);
         if (photo.shutterSpeed) parts.push(photo.shutterSpeed);
         if (photo.iso) parts.push(`ISO ${photo.iso}`);
+        if (photo.focalLength) parts.push(photo.focalLength);
         return parts.join(', ') || 'N/A';
     };
 
@@ -195,13 +178,69 @@ const PhotoDetailPage = () => {
                                 </div>
                             )}
                         </div>
+                        
+
+                        {/* Description */}
+                        <div className="photo-description glass">
+                            <h3>About this photo</h3>
+                            <p>{photo.description || 'No description available.'}</p>
+
+                            <div className="photo-metadata">
+                                {photo.location && (
+                                    <div className="metadata-item">
+                                        <span className="metadata-label">Location</span>
+                                        <span className="metadata-value">{photo.location}</span>
+                                    </div>
+                                )}
+                                {photo.captureDate && (
+                                    <div className="metadata-item">
+                                        <span className="metadata-label">Date</span>
+                                        <span className="metadata-value">{new Date(photo.captureDate).toLocaleDateString()}</span>
+                                    </div>
+                                )}
+                                {photo.cameraModel && (
+                                    <div className="metadata-item">
+                                        <span className="metadata-label">Camera</span>
+                                        <span className="metadata-value">{photo.cameraModel}</span>
+                                    </div>
+                                )}
+                                {photo.lens && (
+                                    <div className="metadata-item">
+                                        <span className="metadata-label">Lens</span>
+                                        <span className="metadata-value">{photo.lens}</span>
+                                    </div>
+                                )}
+                                {photo.focalLength && (
+                                    <div className="metadata-item">
+                                        <span className="metadata-label">Focal Length</span>
+                                        <span className="metadata-value">{photo.focalLength}</span>
+                                    </div>
+                                )}
+                                <div className="metadata-item">
+                                    <span className="metadata-label">Settings</span>
+                                    <span className="metadata-value">{formatExifData()}</span>
+                                </div>
+                            </div>
+
+                            {photo.tags && photo.tags.length > 0 && (
+                                <div className="photo-tags">
+                                    {photo.tags.map((tag) => (
+                                        <span key={tag.id} className="tag">{tag.name}</span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Photo Info */}
                         <div className="photo-info glass">
                             <div className="info-row">
                                 <div className="info-item">
                                     <span className="info-label">Resolution</span>
-                                    <span className="info-value">{photo.width}x{photo.height}px</span>
+                                    <span className="info-value">{photo.width} x {photo.height} px</span>
+                                </div>
+                                <div className="info-item">
+                                    <span className="info-label">File Format</span>
+                                    <span className="info-value">{photo.format?.toUpperCase() || 'JPEG'}</span>
                                 </div>
                                 <div className="info-item">
                                     <span className="info-label">File Size</span>
@@ -209,11 +248,24 @@ const PhotoDetailPage = () => {
                                 </div>
                                 <div className="info-item">
                                     <span className="info-label">Category</span>
-                                    <span className="info-value">{photo.categories?.[0]?.name || 'Uncategorized'}</span>
+                                    <span className="info-value">
+                                        {Array.isArray(photo.categories) && photo.categories.length > 0
+                                            ? (typeof photo.categories[0] === 'string' ? photo.categories[0] : photo.categories[0].name)
+                                            : (typeof photo.categories === 'string' ? photo.categories : 'Uncategorized')}
+                                    </span>
+                                </div>
+                                <div className="info-item">
+                                    <span className="info-label">Captured</span>
+                                    <span className="info-value">{photo.captureDate ? new Date(photo.captureDate).toLocaleDateString() : 'Unknown'}</span>
+                                </div>
+                                <div className="info-item">
+                                    <span className="info-label">Uploaded</span>
+                                    <span className="info-value">{new Date(photo.createdAt).toLocaleDateString()}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
 
                     {/* Sidebar */}
                     <div className="photo-sidebar">
@@ -280,51 +332,6 @@ const PhotoDetailPage = () => {
                             {showSuccessMessage && (
                                 <div className="success-message">
                                     ✓ Added to cart! <Link to="/cart" className="view-cart-link">View Cart</Link>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Description */}
-                        <div className="photo-description glass">
-                            <h3>About this photo</h3>
-                            <p>{photo.description || 'No description available.'}</p>
-
-                            <div className="photo-metadata">
-                                {photo.location && (
-                                    <div className="metadata-item">
-                                        <span className="metadata-label">Location</span>
-                                        <span className="metadata-value">{photo.location}</span>
-                                    </div>
-                                )}
-                                {photo.captureDate && (
-                                    <div className="metadata-item">
-                                        <span className="metadata-label">Date</span>
-                                        <span className="metadata-value">{new Date(photo.captureDate).toLocaleDateString()}</span>
-                                    </div>
-                                )}
-                                {photo.cameraModel && (
-                                    <div className="metadata-item">
-                                        <span className="metadata-label">Camera</span>
-                                        <span className="metadata-value">{photo.cameraModel}</span>
-                                    </div>
-                                )}
-                                {photo.lens && (
-                                    <div className="metadata-item">
-                                        <span className="metadata-label">Lens</span>
-                                        <span className="metadata-value">{photo.lens}</span>
-                                    </div>
-                                )}
-                                <div className="metadata-item">
-                                    <span className="metadata-label">Settings</span>
-                                    <span className="metadata-value">{formatExifData()}</span>
-                                </div>
-                            </div>
-
-                            {photo.tags && photo.tags.length > 0 && (
-                                <div className="photo-tags">
-                                    {photo.tags.map((tag) => (
-                                        <span key={tag.id} className="tag">{tag.name}</span>
-                                    ))}
                                 </div>
                             )}
                         </div>

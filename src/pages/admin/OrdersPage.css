@@ -1,5 +1,6 @@
 .orders-page {
     max-width: 1800px;
+    padding-top: 0 !important;
 }
 
 .stat-card.processing {

@@ -59,6 +59,50 @@ const OrdersPage = () => {
         }
     };
 
+    const downloadImage = async (url: string, filename: string) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+            console.error('Download failed:', err);
+            alert('Failed to download image. Please try again.');
+        }
+    };
+
+    const handleDownloadOrder = async (orderId: number) => {
+        let photos = orderPhotos[orderId];
+
+        if (!photos) {
+            try {
+                const response = await orderApi.getOrderById(orderId);
+                photos = response.items;
+                setOrderPhotos(prev => ({ ...prev, [orderId]: photos }));
+            } catch (err) {
+                console.error('Failed to fetch order photos for download:', err);
+                alert('Failed to prepare download. Please try again.');
+                return;
+            }
+        }
+
+        if (photos && photos.length > 0) {
+            for (const item of photos) {
+                if (item.photoOriginalUrl) {
+                    await downloadImage(item.photoOriginalUrl, `${item.photoTitle.replace(/\s+/g, '_')}_original.jpg`);
+                } else {
+                    console.warn('Original URL missing for item:', item.id);
+                }
+            }
+        }
+    };
+
     if (loading) {
         return (
             <div className="orders-page">
@@ -167,7 +211,10 @@ const OrdersPage = () => {
                                         View Details
                                     </Link>
                                     {order.status.toUpperCase() === 'COMPLETED' && (
-                                        <button className="btn btn-primary btn-sm">
+                                        <button
+                                            className="btn btn-primary btn-sm"
+                                            onClick={() => handleDownloadOrder(order.id)}
+                                        >
                                             Download
                                         </button>
                                     )}
@@ -186,7 +233,21 @@ const OrdersPage = () => {
                                             {orderPhotos[order.id]?.map((item) => (
                                                 <div key={item.id} className="photo-item">
                                                     <img src={item.photoThumbnailUrl} alt={item.photoTitle} />
-                                                    <span className="photo-title">{item.photoTitle}</span>
+                                                    <div className="photo-info-overlay">
+                                                        <span className="photo-title">{item.photoTitle}</span>
+                                                        {item.photoOriginalUrl && (
+                                                            <button
+                                                                className="download-icon-btn"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    downloadImage(item.photoOriginalUrl!, `${item.photoTitle.replace(/\s+/g, '_')}.jpg`);
+                                                                }}
+                                                                title="Download Original"
+                                                            >
+                                                                ⬇️
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>

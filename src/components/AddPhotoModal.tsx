@@ -20,8 +20,18 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
     const [description, setDescription] = useState('');
     const [categoryId, setCategoryId] = useState<string>('');
     const [basePrice, setBasePrice] = useState('');
+    const [commercialPrice, setCommercialPrice] = useState('');
+    const [editorialPrice, setEditorialPrice] = useState('');
+    const [extendedPrice, setExtendedPrice] = useState('');
     const [location, setLocation] = useState('');
     const [tags, setTags] = useState('');
+    const [cameraModel, setCameraModel] = useState('');
+    const [lens, setLens] = useState('');
+    const [focalLength, setFocalLength] = useState('');
+    const [aperture, setAperture] = useState('');
+    const [shutterSpeed, setShutterSpeed] = useState('');
+    const [iso, setIso] = useState('');
+    const [captureDate, setCaptureDate] = useState('');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -124,8 +134,18 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
                 photographerId: getCurrentUserId(),
                 categoryIds: [parseInt(categoryId)],
                 basePrice: parseFloat(basePrice),
+                commercialPrice: commercialPrice ? parseFloat(commercialPrice) : null,
+                editorialPrice: editorialPrice ? parseFloat(editorialPrice) : null,
+                extendedPrice: extendedPrice ? parseFloat(extendedPrice) : null,
                 location: location || null,
-                tagIds: []
+                tagIds: [], // Tags handling would require fetching/creating tags first
+                cameraModel: cameraModel || null,
+                lens: lens || null,
+                focalLength: focalLength || null,
+                aperture: aperture || null,
+                shutterSpeed: shutterSpeed || null,
+                iso: iso || null,
+                captureDate: captureDate || null
             };
 
             const dataBlob = new Blob([JSON.stringify(photoData)], {
@@ -164,8 +184,18 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
         setDescription('');
         setCategoryId('');
         setBasePrice('');
+        setCommercialPrice('');
+        setEditorialPrice('');
+        setExtendedPrice('');
         setLocation('');
         setTags('');
+        setCameraModel('');
+        setLens('');
+        setFocalLength('');
+        setAperture('');
+        setShutterSpeed('');
+        setIso('');
+        setCaptureDate('');
         setError(null);
         onClose();
     };
@@ -286,15 +316,135 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
                                     </div>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Location</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        value={location}
-                                        onChange={(e) => setLocation(e.target.value)}
-                                        placeholder="e.g., Yala National Park"
-                                    />
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Commercial Price ($)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            className="form-input"
+                                            value={commercialPrice}
+                                            onChange={(e) => setCommercialPrice(e.target.value)}
+                                            placeholder="Optional"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Editorial Price ($)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            className="form-input"
+                                            value={editorialPrice}
+                                            onChange={(e) => setEditorialPrice(e.target.value)}
+                                            placeholder="Optional"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Extended Price ($)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            className="form-input"
+                                            value={extendedPrice}
+                                            onChange={(e) => setExtendedPrice(e.target.value)}
+                                            placeholder="Optional"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-divider">Location & Metadata</div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Location</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={location}
+                                            onChange={(e) => setLocation(e.target.value)}
+                                            placeholder="e.g., Yala National Park"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Capture Date</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="form-input"
+                                            value={captureDate}
+                                            onChange={(e) => setCaptureDate(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-divider">EXIF Data</div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Camera Model</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={cameraModel}
+                                            onChange={(e) => setCameraModel(e.target.value)}
+                                            placeholder="e.g., Sony A7R IV"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Lens</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={lens}
+                                            onChange={(e) => setLens(e.target.value)}
+                                            placeholder="e.g., 200-600mm f/5.6-6.3"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Focal Length</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={focalLength}
+                                            onChange={(e) => setFocalLength(e.target.value)}
+                                            placeholder="e.g., 600mm"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Aperture</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={aperture}
+                                            onChange={(e) => setAperture(e.target.value)}
+                                            placeholder="e.g., f/6.3"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Shutter Speed</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={shutterSpeed}
+                                            onChange={(e) => setShutterSpeed(e.target.value)}
+                                            placeholder="e.g., 1/2000s"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>ISO</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={iso}
+                                            onChange={(e) => setIso(e.target.value)}
+                                            placeholder="e.g., 800"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="form-group">

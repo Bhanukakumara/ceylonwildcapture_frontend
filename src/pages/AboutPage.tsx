@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './AboutPage.css';
 
 const AboutPage = () => {
@@ -136,15 +137,15 @@ const AboutPage = () => {
                         <p>Whether you're a photographer, wildlife enthusiast, or simply appreciate nature's beauty,
                             there's a place for you at Ceylon Wild Capture.</p>
                         <div className="cta-buttons">
-                            <a href="/explore" className="btn btn-primary btn-lg">
+                            <Link to="/explore" className="btn btn-primary btn-lg">
                                 Explore Photos
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
-                            </a>
-                            <a href="/contact" className="btn btn-secondary btn-lg">
+                            </Link>
+                            <Link to="/contact" className="btn btn-secondary btn-lg">
                                 Get in Touch
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
