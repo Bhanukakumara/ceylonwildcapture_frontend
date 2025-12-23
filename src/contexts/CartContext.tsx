@@ -82,12 +82,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const addToCart = async (
         photoId: number,
-        photoTitle: string,
-        photoImageUrl: string,
-        photographerName: string,
-        license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL',
-        price: number
-    ) => {
+        _photoTitle: string,
+        _photoImageUrl: string,
+        _photographerName: string,
+        license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL'    ) => {
         try {
             setLoading(true);
             setError(null);

@@ -91,7 +91,7 @@ export const orderApi = {
      * Get current user's orders (summary view)
      */
     getMyOrders: async (page: number = 0, size: number = 20): Promise<PageResponse<OrderSummaryDto>> => {
-        const response = await apiClient.get<PageResponse<OrderSummaryDto>>(`/v1/orders/my-orders?page=${page}&size=${size}`);
+        const response = await apiClient.get<PageResponse<OrderSummaryDto>>(`/v1/orders/my-orders?page=${page}&size=${size}&sort=createdAt,desc`);
         return response.data;
     },
 

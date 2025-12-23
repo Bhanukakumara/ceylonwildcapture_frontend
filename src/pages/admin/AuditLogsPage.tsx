@@ -1,44 +1,87 @@
 import { useState, useEffect } from 'react';
-import adminApi from '../../services/admin-api';
-import type { AuditEventResponse } from '../../services/admin-api';
+import adminApi, { type AuditLogDto } from '../../services/admin-api';
 import '../dashboard/Dashboard.css';
 import './AdminDashboard.css';
 import './AuditLogsPage.css';
 
-type AuditType = 'ALL' | 'LOGIN' | 'LOGIN_FAILED' | 'DOWNLOAD' | 'ADMIN_MODERATION' | 'PAYMENT_EVENT' | 'PAYOUT_ACTION' | 'USER_UPDATE';
+type FilterType = 'ALL' | 'LOGINS' | 'FAILED_LOGINS' | 'DOWNLOADS' | 'EVENT_TYPE' | 'ENTITY_TYPE' | 'ACTION' | 'SEARCH';
 
 const AuditLogsPage = () => {
-    const [auditTypeFilter, setAuditTypeFilter] = useState<AuditType>('LOGIN');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedLog, setSelectedLog] = useState<AuditEventResponse | null>(null);
+    const [filterType, setFilterType] = useState<FilterType>('ALL');
+    const [filterValue, setFilterValue] = useState('');
+    const [selectedLog, setSelectedLog] = useState<AuditLogDto | null>(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     // Data states
-    const [auditLogs, setAuditLogs] = useState<AuditEventResponse[]>([]);
+    const [auditLogs, setAuditLogs] = useState<AuditLogDto[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
 
     useEffect(() => {
         fetchAuditLogs();
-        // Ideally fetch stats separate but for now we might leave stats as 0 or implement a stats endpoint later
-    }, [currentPage, auditTypeFilter]);
+    }, [currentPage, filterType, filterValue]);
 
     const fetchAuditLogs = async () => {
         setLoading(true);
+        setError(null);
         try {
-            const data = await adminApi.getAuditLogs(
-                currentPage,
-                20,
-                auditTypeFilter,
-                undefined // userId
-            );
+            let data;
+            const pageSize = 20;
+
+            switch (filterType) {
+                case 'ALL':
+                    data = await adminApi.getAllAuditLogs(currentPage, pageSize);
+                    break;
+                case 'LOGINS':
+                    data = await adminApi.getLoginAuditLogs(currentPage, pageSize);
+                    break;
+                case 'FAILED_LOGINS':
+                    data = await adminApi.getFailedLoginAttempts(currentPage, pageSize);
+                    break;
+                case 'DOWNLOADS':
+                    data = await adminApi.getDownloadAuditLogs(currentPage, pageSize);
+                    break;
+                case 'EVENT_TYPE':
+                    if (filterValue) {
+                        data = await adminApi.getAuditLogsByEventType(filterValue, currentPage, pageSize);
+                    } else {
+                        data = await adminApi.getAllAuditLogs(currentPage, pageSize);
+                    }
+                    break;
+                case 'ENTITY_TYPE':
+                    if (filterValue) {
+                        data = await adminApi.getAuditLogsByEntityType(filterValue, currentPage, pageSize);
+                    } else {
+                        data = await adminApi.getAllAuditLogs(currentPage, pageSize);
+                    }
+                    break;
+                case 'ACTION':
+                    if (filterValue) {
+                        data = await adminApi.getAuditLogsByAction(filterValue, currentPage, pageSize);
+                    } else {
+                        data = await adminApi.getAllAuditLogs(currentPage, pageSize);
+                    }
+                    break;
+                case 'SEARCH':
+                    if (filterValue.trim()) {
+                        data = await adminApi.searchAuditLogs(filterValue.trim(), currentPage, pageSize);
+                    } else {
+                        data = await adminApi.getAllAuditLogs(currentPage, pageSize);
+                    }
+                    break;
+                default:
+                    data = await adminApi.getAllAuditLogs(currentPage, pageSize);
+            }
+
             setAuditLogs(data.content);
             setTotalElements(data.totalElements);
-            setTotalPages(Math.ceil(data.totalElements / 20));
-        } catch (error) {
+            setTotalPages(data.totalPages);
+        } catch (error: any) {
             console.error('Error fetching audit logs:', error);
+            setError(error.response?.data?.message || 'Failed to fetch audit logs');
         } finally {
             setLoading(false);
         }
@@ -55,35 +98,41 @@ const AuditLogsPage = () => {
         });
     };
 
-    const getAuditTypeColor = (type: string) => {
+    const getEventTypeColor = (type: string) => {
         const colors: { [key: string]: string } = {
             LOGIN: 'login',
-            LOGIN_FAILED: 'failed',
-            DOWNLOAD: 'download',
-            ADMIN_MODERATION: 'admin',
+            LOGOUT: 'default',
+            PHOTO_UPLOAD: 'activity',
+            PHOTO_DOWNLOAD: 'download',
+            PHOTO_DELETE: 'failed',
+            MODERATION: 'admin',
+            USER_BAN: 'failed',
             PAYMENT_EVENT: 'payment',
             PAYOUT_ACTION: 'payment',
-            USER_UPDATE: 'activity'
+            ORDER_CREATE: 'activity',
+            ORDER_UPDATE: 'activity',
         };
         return colors[type] || 'default';
     };
 
-    const getAuditTypeLabel = (type: string) => {
-        const labels: { [key: string]: string } = {
-            LOGIN: 'Login Success',
-            LOGIN_FAILED: 'Login Failed',
-            DOWNLOAD: 'Download',
-            ADMIN_MODERATION: 'Admin Moderation',
-            PAYMENT_EVENT: 'Payment Event',
-            PAYOUT_ACTION: 'Payout Action',
-            USER_UPDATE: 'User Update'
-        };
-        return labels[type] || type;
+    const getEventTypeLabel = (type: string) => {
+        return type?.replace(/_/g, ' ') || 'Unknown';
     };
 
-    const handleViewDetails = (log: AuditEventResponse) => {
+    const handleViewDetails = (log: AuditLogDto) => {
         setSelectedLog(log);
         setShowDetailsModal(true);
+    };
+
+    const handleFilterTypeChange = (newFilterType: FilterType) => {
+        setFilterType(newFilterType);
+        setFilterValue('');
+        setCurrentPage(0);
+    };
+
+    const handleFilterValueChange = (value: string) => {
+        setFilterValue(value);
+        setCurrentPage(0);
     };
 
     return (
@@ -98,49 +147,79 @@ const AuditLogsPage = () => {
                 </div>
             </div>
 
-            {/* Statistics Grid - Placeholder for now as backend doesn't provide summary stats yet */}
-            {/* ... keeping simplified or hidden ... */}
-
             {/* Filters */}
             <div className="admin-card">
                 <div className="admin-table-header">
-                    {/* Search is client side for now if backend ignores it */}
-                    <input
-                        type="text"
-                        placeholder="Search functionality coming soon..."
-                        className="admin-search-input"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        disabled
-                    />
-                    <select
-                        className="admin-filter-select"
-                        value={auditTypeFilter}
-                        onChange={(e) => {
-                            setAuditTypeFilter(e.target.value as AuditType);
-                            setCurrentPage(0);
-                        }}
-                    >
-                        <option value="ALL">All Types</option>
-                        <option value="LOGIN">Login Success</option>
-                        <option value="LOGIN_FAILED">Login Failed</option>
-                        <option value="DOWNLOAD">Download</option>
-                        <option value="ADMIN_MODERATION">Admin Moderation</option>
-                        <option value="PAYMENT_EVENT">Payment Event</option>
-                        <option value="PAYOUT_ACTION">Payout Action</option>
-                        <option value="USER_UPDATE">User Update</option>
-                    </select>
+                    <div className="filter-row">
+                        <select
+                            className="admin-filter-select"
+                            value={filterType}
+                            onChange={(e) => handleFilterTypeChange(e.target.value as FilterType)}
+                        >
+                            <option value="ALL">All Logs</option>
+                            <option value="LOGINS">Logins</option>
+                            <option value="FAILED_LOGINS">Failed Logins</option>
+                            <option value="DOWNLOADS">Downloads</option>
+                            <option value="EVENT_TYPE">By Event Type</option>
+                            <option value="ENTITY_TYPE">By Entity Type</option>
+                            <option value="ACTION">By Action</option>
+                            <option value="SEARCH">Search</option>
+                        </select>
+
+                        {/* Secondary filter input based on filter type */}
+                        {filterType === 'EVENT_TYPE' && (
+                            <input
+                                type="text"
+                                placeholder="Enter event type (e.g., LOGIN, PHOTO_UPLOAD)"
+                                className="admin-search-input"
+                                value={filterValue}
+                                onChange={(e) => handleFilterValueChange(e.target.value)}
+                            />
+                        )}
+                        {filterType === 'ENTITY_TYPE' && (
+                            <input
+                                type="text"
+                                placeholder="Enter entity type (e.g., USER, PHOTO, ORDER)"
+                                className="admin-search-input"
+                                value={filterValue}
+                                onChange={(e) => handleFilterValueChange(e.target.value)}
+                            />
+                        )}
+                        {filterType === 'ACTION' && (
+                            <input
+                                type="text"
+                                placeholder="Enter action (e.g., CREATE, UPDATE, DELETE)"
+                                className="admin-search-input"
+                                value={filterValue}
+                                onChange={(e) => handleFilterValueChange(e.target.value)}
+                            />
+                        )}
+                        {filterType === 'SEARCH' && (
+                            <input
+                                type="text"
+                                placeholder="Search descriptions, actions, event types..."
+                                className="admin-search-input"
+                                value={filterValue}
+                                onChange={(e) => handleFilterValueChange(e.target.value)}
+                            />
+                        )}
+                    </div>
                 </div>
 
                 {/* Audit Logs Table */}
                 <div className="admin-table-container">
+                    {error && (
+                        <div className="error-message" style={{ padding: '1rem', color: '#ef4444', textAlign: 'center' }}>
+                            {error}
+                        </div>
+                    )}
                     <table className="admin-table">
                         <thead>
                             <tr>
-                                <th>Type</th>
-                                <th>Actor</th>
+                                <th>Event Type</th>
                                 <th>Action</th>
-                                <th>Result</th>
+                                <th>User</th>
+                                <th>Entity</th>
                                 <th>IP Address</th>
                                 <th>Timestamp</th>
                                 <th>Actions</th>
@@ -155,24 +234,25 @@ const AuditLogsPage = () => {
                                 auditLogs.map((log) => (
                                     <tr key={log.id}>
                                         <td>
-                                            <span className={`audit-type-badge ${getAuditTypeColor(log.auditType)}`}>
-                                                {getAuditTypeLabel(log.auditType)}
+                                            <span className={`audit-type-badge ${getEventTypeColor(log.eventType)}`}>
+                                                {getEventTypeLabel(log.eventType)}
                                             </span>
-                                        </td>
-                                        <td>
-                                            <div className="user-cell">
-                                                {log.actorName || 'Unknown'}
-                                                {log.actorType === 'ADMIN' && <span className="admin-indicator">Admin</span>}
-                                            </div>
                                         </td>
                                         <td className="action-cell">{log.action?.replace(/_/g, ' ')}</td>
                                         <td>
-                                            <span className={`status-badge ${log.actionResult?.toLowerCase()}`}>
-                                                {log.actionResult}
-                                            </span>
+                                            <div className="user-cell">
+                                                {log.username || `User ${log.userId || 'N/A'}`}
+                                            </div>
                                         </td>
-                                        <td className="ip-cell">{log.ipAddress}</td>
-                                        <td className="date-cell">{formatDate(log.createdAt)}</td>
+                                        <td className="entity-cell">
+                                            {log.entityType && log.entityId ? (
+                                                <span>{log.entityType} #{log.entityId}</span>
+                                            ) : (
+                                                <span className="text-muted">-</span>
+                                            )}
+                                        </td>
+                                        <td className="ip-cell">{log.ipAddress || '-'}</td>
+                                        <td className="date-cell">{formatDate(log.timestamp)}</td>
                                         <td>
                                             <div className="table-actions">
                                                 <button
@@ -199,7 +279,7 @@ const AuditLogsPage = () => {
                     <div className="pagination-controls">
                         <button
                             className="btn btn-ghost btn-sm"
-                            disabled={currentPage === 0}
+                            disabled={currentPage === 0 || loading}
                             onClick={() => setCurrentPage(prev => prev - 1)}
                         >
                             Previous
@@ -207,7 +287,7 @@ const AuditLogsPage = () => {
                         <span>Page {currentPage + 1} of {Math.max(1, totalPages)}</span>
                         <button
                             className="btn btn-ghost btn-sm"
-                            disabled={currentPage >= totalPages - 1}
+                            disabled={currentPage >= totalPages - 1 || loading}
                             onClick={() => setCurrentPage(prev => prev + 1)}
                         >
                             Next
@@ -229,28 +309,33 @@ const AuditLogsPage = () => {
                                 <div className="audit-info-section">
                                     <h4>Event Information</h4>
                                     <div className="detail-grid">
-                                        <div><strong>Type:</strong> <span className={`audit-type-badge ${getAuditTypeColor(selectedLog.auditType)}`}>{getAuditTypeLabel(selectedLog.auditType)}</span></div>
+                                        <div><strong>Event Type:</strong> <span className={`audit-type-badge ${getEventTypeColor(selectedLog.eventType)}`}>{getEventTypeLabel(selectedLog.eventType)}</span></div>
                                         <div><strong>Action:</strong> {selectedLog.action}</div>
-                                        <div><strong>Result:</strong> {selectedLog.actionResult}</div>
-                                        <div><strong>Timestamp:</strong> {formatDate(selectedLog.createdAt)}</div>
+                                        <div><strong>Timestamp:</strong> {formatDate(selectedLog.timestamp)}</div>
                                     </div>
                                 </div>
 
                                 <div className="audit-info-section">
-                                    <h4>Actor Information</h4>
+                                    <h4>User Information</h4>
                                     <div className="detail-grid">
-                                        <div><strong>Name:</strong> {selectedLog.actorName}</div>
-                                        <div><strong>Type:</strong> {selectedLog.actorType}</div>
-                                        {selectedLog.actorId && <div><strong>ID:</strong> {selectedLog.actorId}</div>}
+                                        <div><strong>Username:</strong> {selectedLog.username || 'N/A'}</div>
+                                        <div><strong>User ID:</strong> {selectedLog.userId || 'N/A'}</div>
+                                    </div>
+                                </div>
+
+                                <div className="audit-info-section">
+                                    <h4>Entity Information</h4>
+                                    <div className="detail-grid">
+                                        <div><strong>Entity Type:</strong> {selectedLog.entityType || 'N/A'}</div>
+                                        <div><strong>Entity ID:</strong> {selectedLog.entityId || 'N/A'}</div>
                                     </div>
                                 </div>
 
                                 <div className="audit-info-section">
                                     <h4>Technical Details</h4>
                                     <div className="detail-grid">
-                                        <div><strong>IP Address:</strong> {selectedLog.ipAddress}</div>
-                                        {selectedLog.entityType && <div><strong>Entity Type:</strong> {selectedLog.entityType}</div>}
-                                        {selectedLog.entityId && <div><strong>Entity ID:</strong> {selectedLog.entityId}</div>}
+                                        <div><strong>IP Address:</strong> {selectedLog.ipAddress || 'N/A'}</div>
+                                        <div><strong>User Agent:</strong> {selectedLog.userAgent || 'N/A'}</div>
                                     </div>
                                 </div>
 
@@ -261,10 +346,10 @@ const AuditLogsPage = () => {
                                     </div>
                                 )}
 
-                                {selectedLog.details && (
+                                {selectedLog.metadata && (
                                     <div className="audit-info-section full-width">
-                                        <h4>Details</h4>
-                                        <pre>{JSON.stringify(selectedLog.details, null, 2)}</pre>
+                                        <h4>Metadata</h4>
+                                        <pre>{selectedLog.metadata}</pre>
                                     </div>
                                 )}
                             </div>

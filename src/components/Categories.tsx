@@ -8,6 +8,7 @@ interface Category {
     count: number;
     icon: string;
     color: string;
+    imageUrl?: string;
 }
 
 // Icon and color mapping for common wildlife categories
@@ -51,7 +52,8 @@ const Categories = () => {
                         name: category.name,
                         count: photoCount,
                         icon: getCategoryIcon(category.name),
-                        color: getCategoryColor(index)
+                        color: getCategoryColor(index),
+                        imageUrl: category.imageUrl // Include imageUrl from backend
                     };
                 });
 
@@ -105,7 +107,13 @@ const Categories = () => {
                             data-aos-delay={(index % 6) * 100}
                             style={{ '--category-color': category.color } as React.CSSProperties}
                         >
-                            <div className="category-icon">{category.icon}</div>
+                            {category.imageUrl ? (
+                                <div className="category-image-wrapper">
+                                    <img src={category.imageUrl} alt={category.name} className="category-image" />
+                                </div>
+                            ) : (
+                                <div className="category-icon">{category.icon}</div>
+                            )}
                             <h3 className="category-name">{category.name}</h3>
                             <p className="category-count">{category.count.toLocaleString()} photos</p>
                             <div className="category-arrow">

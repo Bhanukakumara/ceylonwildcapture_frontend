@@ -1,11 +1,12 @@
 .orders-page {
     min-height: 100vh;
-    padding: 8rem 0 4rem;
+    padding: 12rem 0 4rem;
     background: var(--bg);
 }
 
 /* Header */
 .orders-header {
+    margin-top: 5rem;
     margin-bottom: 3rem;
     text-align: center;
 }

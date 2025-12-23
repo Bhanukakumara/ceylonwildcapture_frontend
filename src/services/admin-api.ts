@@ -55,21 +55,20 @@ export interface OrderSummary {
     createdAt: string;
 }
 
-export interface AuditEventResponse {
+// Audit Log DTO matching backend structure
+export interface AuditLogDto {
     id: number;
-    auditType: string;
-    actorId?: number;
-    actorName?: string;
-    actorType?: string;
-    entityType?: string;
+    eventType: string;      // LOGIN, PHOTO_DOWNLOAD, PHOTO_UPLOAD, etc.
+    entityType?: string;    // USER, PHOTO, ORDER, PAYOUT, etc.
     entityId?: number;
-    action: string;
-    actionResult: string;
+    userId?: number;
+    username?: string;
+    action: string;         // CREATE, UPDATE, DELETE, APPROVE, REJECT, etc.
     description?: string;
-    metadata?: string;
     ipAddress?: string;
-    createdAt: string;
-    details?: Record<string, any>;
+    userAgent?: string;
+    timestamp: string;
+    metadata?: string;
 }
 
 const adminApi = {
@@ -78,17 +77,59 @@ const adminApi = {
         return response.data;
     },
 
-    getAuditLogs: async (
-        page: number = 0,
-        size: number = 20,
-        auditType?: string,
-        userId?: number
-    ): Promise<{ content: AuditEventResponse[], totalElements: number }> => {
-        let url = `/v1/audit?page=${page}&size=${size}`;
-        if (auditType && auditType !== 'ALL') url += `&auditType=${auditType}`;
-        if (userId) url += `&userId=${userId}`;
+    // Audit Log API Methods
+    getAllAuditLogs: async (page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
 
-        const response = await api.get(url);
+    getAuditLogsByEventType: async (eventType: string, page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/event-type/${eventType}?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    getAuditLogsByEntityType: async (entityType: string, page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/entity-type/${entityType}?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    getAuditLogsByUser: async (userId: number, page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/user/${userId}?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    getAuditLogsByDateRange: async (startDate: string, endDate: string, page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/date-range?startDate=${startDate}&endDate=${endDate}&page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    getAuditLogsForEntity: async (entityType: string, entityId: number, page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/entity/${entityType}/${entityId}?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    getDownloadAuditLogs: async (page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/downloads?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    getLoginAuditLogs: async (page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/logins?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    getFailedLoginAttempts: async (page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/failed-logins?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    getAuditLogsByAction: async (action: string, page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/action/${action}?page=${page}&size=${size}&sort=createdAt,desc`);
+        return response.data;
+    },
+
+    searchAuditLogs: async (searchTerm: string, page: number = 0, size: number = 20): Promise<{ content: AuditLogDto[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/audit-logs/search?searchTerm=${encodeURIComponent(searchTerm)}&page=${page}&size=${size}&sort=createdAt,desc`);
         return response.data;
     },
 
@@ -122,6 +163,125 @@ const adminApi = {
 
     updateOrderStatus: async (orderId: number, status: string, notes?: string): Promise<any> => {
         const response = await api.put(`/v1/orders/${orderId}/status`, { status, notes });
+        return response.data;
+    },
+
+    // Category Management API Methods
+    getAllCategories: async (page: number = 0, size: number = 20): Promise<{ content: any[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/categories-tags/categories?page=${page}&size=${size}`);
+        return response.data;
+    },
+
+    createCategory: async (category: any): Promise<any> => {
+        const response = await api.post('/v1/admin/categories-tags/categories', category);
+        return response.data;
+    },
+
+    updateCategory: async (categoryId: number, category: any): Promise<any> => {
+        const response = await api.put(`/v1/admin/categories-tags/categories/${categoryId}`, category);
+        return response.data;
+    },
+
+    deleteCategory: async (categoryId: number): Promise<void> => {
+        await api.delete(`/v1/admin/categories-tags/categories/${categoryId}`);
+    },
+
+    mergeCategories: async (sourceCategoryId: number, targetCategoryId: number): Promise<any> => {
+        const response = await api.post(`/v1/admin/categories-tags/categories/merge?sourceCategoryId=${sourceCategoryId}&targetCategoryId=${targetCategoryId}`);
+        return response.data;
+    },
+
+    getUnusedCategories: async (): Promise<any[]> => {
+        const response = await api.get('/v1/admin/categories-tags/categories/unused');
+        return response.data;
+    },
+
+    deleteUnusedCategories: async (): Promise<number> => {
+        const response = await api.delete('/v1/admin/categories-tags/categories/unused');
+        return response.data;
+    },
+
+    // Tag Management API Methods
+    getAllTags: async (page: number = 0, size: number = 20): Promise<{ content: any[], totalElements: number, totalPages: number }> => {
+        const response = await api.get(`/v1/admin/categories-tags/tags?page=${page}&size=${size}`);
+        return response.data;
+    },
+
+    createTag: async (tag: any): Promise<any> => {
+        const response = await api.post('/v1/admin/categories-tags/tags', tag);
+        return response.data;
+    },
+
+    updateTag: async (tagId: number, tag: any): Promise<any> => {
+        const response = await api.put(`/v1/admin/categories-tags/tags/${tagId}`, tag);
+        return response.data;
+    },
+
+    deleteTag: async (tagId: number): Promise<void> => {
+        await api.delete(`/v1/admin/categories-tags/tags/${tagId}`);
+    },
+
+    mergeTags: async (sourceTagId: number, targetTagId: number): Promise<any> => {
+        const response = await api.post(`/v1/admin/categories-tags/tags/merge?sourceTagId=${sourceTagId}&targetTagId=${targetTagId}`);
+        return response.data;
+    },
+
+    getUnusedTags: async (): Promise<any[]> => {
+        const response = await api.get('/v1/admin/categories-tags/tags/unused');
+        return response.data;
+    },
+
+    deleteUnusedTags: async (): Promise<number> => {
+        const response = await api.delete('/v1/admin/categories-tags/tags/unused');
+        return response.data;
+    },
+
+    // Upload category image to Cloudinary
+    uploadCategoryImage: async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/v1/admin/categories-tags/upload-image', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    },
+
+    // Financial Reports API Methods
+    generateFinancialReport: async (startDate: string, endDate: string): Promise<any> => {
+        const response = await api.get(`/v1/admin/reports/financial?startDate=${startDate}&endDate=${endDate}`);
+        return response.data;
+    },
+
+    generateMonthlyReport: async (year: number, month: number): Promise<any> => {
+        const response = await api.get(`/v1/admin/reports/financial/monthly?year=${year}&month=${month}`);
+        return response.data;
+    },
+
+    generateYearlyReport: async (year: number): Promise<any> => {
+        const response = await api.get(`/v1/admin/reports/financial/yearly?year=${year}`);
+        return response.data;
+    },
+
+    exportReportToPdf: async (report: any): Promise<Blob> => {
+        const response = await api.post('/v1/admin/reports/financial/export/pdf', report, {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
+
+    exportReportToExcel: async (report: any): Promise<Blob> => {
+        const response = await api.post('/v1/admin/reports/financial/export/excel', report, {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
+
+    exportReportToCsv: async (report: any): Promise<Blob> => {
+        const response = await api.post('/v1/admin/reports/financial/export/csv', report, {
+            responseType: 'blob'
+        });
         return response.data;
     },
 };
