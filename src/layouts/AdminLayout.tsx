@@ -1,7 +1,11 @@
-import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { logout } from '../services/api';
-import './AdminLayout.css';
+import Sidebar from '../components/Sidebar/Sidebar';
+import type { SidebarItem } from '../components/Sidebar/Sidebar';
+import DashboardHeader from '../components/DashboardHeader/DashboardHeader';
+import type { UserMenuItem } from '../components/DashboardHeader/DashboardHeader';
+import './DashboardLayout.css';
 
 const AdminLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -12,7 +16,7 @@ const AdminLayout = () => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            if (userMenuOpen && !target.closest('.admin-user-menu')) {
+            if (userMenuOpen && !target.closest('.user-menu')) {
                 setUserMenuOpen(false);
             }
         };
@@ -21,7 +25,7 @@ const AdminLayout = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [userMenuOpen]);
 
-    const adminMenuItems = [
+    const adminMenuItems: SidebarItem[] = [
         { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
         { path: '/admin/users', label: 'Users', icon: '👥' },
         { path: '/admin/photographers', label: 'Photographers', icon: '👨‍🎨' },
@@ -41,111 +45,53 @@ const AdminLayout = () => {
         navigate('/login');
     };
 
+    const userMenuItems: UserMenuItem[] = [
+        {
+            label: 'Settings',
+            icon: '⚙️',
+            onClick: () => { navigate('/admin/settings'); setUserMenuOpen(false); }
+        },
+        {
+            label: 'Profile',
+            icon: '👤',
+            onClick: () => { navigate('/admin/dashboard'); setUserMenuOpen(false); }
+        },
+        { label: '', icon: '', onClick: () => { }, className: 'divider' },
+        {
+            label: 'Logout',
+            icon: '🚪',
+            onClick: handleLogout,
+            className: 'logout'
+        }
+    ];
+
     return (
-        <div className="admin-layout">
-            <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-                <Link to="/" className="admin-sidebar-header">
-                    <svg className="admin-logo" viewBox="0 0 40 40" fill="none">
-                        <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
-                        <path d="M20 10 L28 20 L20 30 L12 20 Z" fill="currentColor" />
-                    </svg>
-                    {sidebarOpen && (
-                        <div className="admin-brand-text">
-                            <span className="admin-brand-name">Ceylon Wild</span>
-                            <span className="admin-badge">Admin</span>
-                        </div>
-                    )}
-                </Link>
+        <div className="dashboard-layout">
+            <Sidebar
+                items={adminMenuItems}
+                isOpen={sidebarOpen}
+                onToggle={() => setSidebarOpen(!sidebarOpen)}
+                brandName="Ceylon Wild"
+                brandBadge="Admin"
+                variant="admin"
+            />
 
-                <nav className="admin-nav">
-                    {adminMenuItems.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            className={({ isActive }) =>
-                                `admin-nav-link ${isActive ? 'active' : ''}`
-                            }
-                            end={item.path === '/admin/dashboard'}
-                        >
-                            <span className="admin-nav-icon">{item.icon}</span>
-                            {sidebarOpen && <span className="admin-nav-label">{item.label}</span>}
-                        </NavLink>
-                    ))}
-                </nav>
+            <div className="dashboard-main">
+                <DashboardHeader
+                    title="Admin Panel"
+                    onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+                    notifications={5}
+                    userInfo={{
+                        name: 'Admin User',
+                        role: 'Administrator'
+                    }}
+                    variant="admin"
+                    userMenuOpen={userMenuOpen}
+                    onUserMenuToggle={() => setUserMenuOpen(!userMenuOpen)}
+                    userMenuItems={userMenuItems}
+                />
 
-                <button
-                    className="admin-sidebar-toggle"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    aria-label="Toggle sidebar"
-                >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path
-                            d={sidebarOpen ? "M15 5L5 15M5 5l10 10" : "M3 10h14M3 5h14M3 15h14"}
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                        />
-                    </svg>
-                </button>
-            </aside>
-
-            <div className="admin-main">
-                <header className="admin-header">
-                    <div className="admin-header-left">
-                        <button
-                            className="admin-mobile-menu-btn"
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                        </button>
-                        <h1 className="admin-title">Admin Panel</h1>
-                    </div>
-
-                    <div className="admin-header-right">
-                        <button className="admin-header-btn" aria-label="Notifications">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                <path d="M10 2a6 6 0 016 6v3.586l1.707 1.707A1 1 0 0117 15H3a1 1 0 01-.707-1.707L4 11.586V8a6 6 0 016-6z" stroke="currentColor" strokeWidth="2" />
-                                <path d="M8 15v1a2 2 0 004 0v-1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                            <span className="admin-notification-badge">5</span>
-                        </button>
-
-                        <div className="admin-user-menu" onClick={() => setUserMenuOpen(!userMenuOpen)}>
-                            <div className="admin-user-avatar">
-                                <span>AD</span>
-                            </div>
-                            <div className="admin-user-info">
-                                <div className="admin-user-name">Admin User</div>
-                                <div className="admin-user-role">Administrator</div>
-                            </div>
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="admin-dropdown-icon">
-                                <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-
-                            {userMenuOpen && (
-                                <div className="admin-user-dropdown">
-                                    <button className="admin-dropdown-item" onClick={(e) => { e.stopPropagation(); navigate('/admin/settings'); setUserMenuOpen(false); }}>
-                                        <span>⚙️</span>
-                                        <span>Settings</span>
-                                    </button>
-                                    <button className="admin-dropdown-item" onClick={(e) => { e.stopPropagation(); navigate('/admin/dashboard'); setUserMenuOpen(false); }}>
-                                        <span>👤</span>
-                                        <span>Profile</span>
-                                    </button>
-                                    <div className="admin-dropdown-divider"></div>
-                                    <button className="admin-dropdown-item logout" onClick={(e) => { e.stopPropagation(); handleLogout(); }}>
-                                        <span>🚪</span>
-                                        <span>Logout</span>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </header>
-
-                <main className="admin-content">
+                <main className="dashboard-content">
                     <Outlet />
                 </main>
             </div>
