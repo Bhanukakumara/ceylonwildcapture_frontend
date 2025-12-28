@@ -3,6 +3,12 @@ import { useEffect, useState } from 'react';
 import adminApi, { type DashboardStats, type CategoryPerformance, type RecentActivity } from '../../services/admin-api';
 import '../dashboard/Dashboard.css';
 import './AdminDashboard.css';
+import {
+    DashboardPageHeader,
+    StatsGrid,
+    StatCard,
+    DashboardSection
+} from '../../components/dashboard';
 
 const AdminDashboardPage = () => {
     const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
@@ -38,12 +44,6 @@ const AdminDashboardPage = () => {
         fetchDashboardData();
     }, []);
 
-    const growthMetrics = {
-        userGrowth: 12.5,
-        photographerGrowth: 8.3,
-        photoGrowth: 15.7,
-        revenueGrowth: 22.4
-    };
 
 
 
@@ -58,10 +58,6 @@ const AdminDashboardPage = () => {
         return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
-    const formatGrowth = (growth: number) => {
-        const sign = growth >= 0 ? '+' : '';
-        return `${sign}${growth.toFixed(1)}%`;
-    };
 
     return (
         <div className="admin-dashboard">
@@ -83,88 +79,80 @@ const AdminDashboardPage = () => {
 
             {!loading && !error && dashboardStats && (
                 <>
-                    <div className="dashboard-header">
-                        <div>
-                            <h2>Admin Dashboard</h2>
-                            <p className="page-subtitle">Platform overview and analytics</p>
-                        </div>
-                        <div className="header-actions">
-                            <select className="date-range-select">
-                                <option value="today">Today</option>
-                                <option value="week">This Week</option>
-                                <option value="month">This Month</option>
-                                <option value="year">This Year</option>
-                                <option value="custom">Custom Range</option>
-                            </select>
-                        </div>
-                    </div>
+                    <DashboardPageHeader
+                        title="Admin Dashboard"
+                        subtitle="Platform overview and analytics"
+                    >
+                        <select className="date-range-select">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </DashboardPageHeader>
 
                     {/* Main Statistics Grid */}
-                    <div className="stats-grid stats-grid-4">
-                        <div className="stat-card glass admin-stat-card">
-                            <div className="stat-icon">👥</div>
-                            <div className="stat-content">
-                                <div className="stat-value">{dashboardStats.totalUsers.toLocaleString()}</div>
-                                <div className="stat-label">Total Users</div>
-                                <div className="stat-trend positive">{formatGrowth(growthMetrics.userGrowth)}</div>
-                            </div>
-                        </div>
-                        <div className="stat-card glass admin-stat-card">
-                            <div className="stat-icon">📸</div>
-                            <div className="stat-content">
-                                <div className="stat-value">{dashboardStats.totalPhotos.toLocaleString()}</div>
-                                <div className="stat-label">Total Photos</div>
-                                <div className="stat-trend positive">{formatGrowth(growthMetrics.photoGrowth)}</div>
-                            </div>
-                        </div>
-                        <div className="stat-card glass admin-stat-card">
-                            <div className="stat-icon">🛒</div>
-                            <div className="stat-content">
-                                <div className="stat-value">{dashboardStats.totalOrders.toLocaleString()}</div>
-                                <div className="stat-label">Total Orders</div>
-                                <div className="stat-trend positive">+18.2%</div>
-                            </div>
-                        </div>
-                        <div className="stat-card glass admin-stat-card">
-                            <div className="stat-icon">💰</div>
-                            <div className="stat-content">
-                                <div className="stat-value">{formatCurrency(dashboardStats.totalRevenue)}</div>
-                                <div className="stat-label">Total Revenue</div>
-                                <div className="stat-trend positive">{formatGrowth(growthMetrics.revenueGrowth)}</div>
-                            </div>
-                        </div>
-                    </div>
+                    <StatsGrid columns={4}>
+                        <StatCard
+                            icon="👥"
+                            value={dashboardStats.totalUsers.toLocaleString()}
+                            label="Total Users"
+                            className="admin-stat-card"
+                        />
+                        <StatCard
+                            icon="📸"
+                            value={dashboardStats.totalPhotos.toLocaleString()}
+                            label="Total Photos"
+                            className="admin-stat-card"
+                        />
+                        <StatCard
+                            icon="🛒"
+                            value={dashboardStats.totalOrders.toLocaleString()}
+                            label="Total Orders"
+                            className="admin-stat-card"
+                        />
+                        <StatCard
+                            icon="💰"
+                            value={formatCurrency(dashboardStats.totalRevenue)}
+                            label="Total Revenue"
+                            className="admin-stat-card"
+                        />
+                    </StatsGrid>
 
                     {/* Secondary Statistics */}
-                    <div className="stats-grid stats-grid-6">
-                        <div className="stat-card glass admin-stat-card">
-                            <div className="stat-content">
-                                <div className="stat-value">{dashboardStats.totalPhotographers}</div>
-                                <div className="stat-label">Photographers</div>
-                            </div>
-                        </div>
-                        <div className="stat-card glass admin-stat-card">
-                            <div className="stat-content">
-                                <div className="stat-value">{dashboardStats.totalCustomers.toLocaleString()}</div>
-                                <div className="stat-label">Buyers</div>
-                            </div>
-                        </div>
-                        <div className="stat-card glass admin-stat-card pending">
-                            <div className="stat-content">
-                                <div className="stat-value">{dashboardStats.pendingPhotos}</div>
-                                <div className="stat-label">Pending Photos</div>
-                            </div>
-                        </div>
-                    </div>
+                    <StatsGrid columns={6}>
+                        <StatCard
+                            value={dashboardStats.totalPhotographers}
+                            label="Photographers"
+                            className="admin-stat-card"
+                            variant="glass"
+                            icon=""
+                        />
+                        <StatCard
+                            value={dashboardStats.totalCustomers.toLocaleString()}
+                            label="Buyers"
+                            className="admin-stat-card"
+                            variant="glass"
+                            icon=""
+                        />
+                        <StatCard
+                            value={dashboardStats.pendingPhotos}
+                            label="Pending Photos"
+                            className="admin-stat-card pending"
+                            variant="glass"
+                            icon=""
+                        />
+                    </StatsGrid>
 
                     {/* Content Grid */}
                     <div className="dashboard-content-grid">
                         {/* Category Performance */}
-                        <div className="admin-card">
-                            <div className="card-header">
-                                <h3>Category Performance</h3>
-                                <Link to="/admin/categories" className="card-link">View All →</Link>
-                            </div>
+                        <DashboardSection
+                            title="Category Performance"
+                            action={<Link to="/admin/categories" className="card-link">View All →</Link>}
+                            className="admin-card"
+                        >
                             <div className="category-performance-list">
                                 {categoryPerformance.map((category, index) => (
                                     <div key={index} className="category-performance-item">
@@ -178,13 +166,10 @@ const AdminDashboardPage = () => {
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </DashboardSection>
 
                         {/* Recent Activity */}
-                        <div className="admin-card">
-                            <div className="card-header">
-                                <h3>Recent Activity</h3>
-                            </div>
+                        <DashboardSection title="Recent Activity" className="admin-card">
                             <div className="activity-feed">
                                 {recentActivity.map((activity, index) => (
                                     <div key={index} className="activity-item">
@@ -201,14 +186,11 @@ const AdminDashboardPage = () => {
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </DashboardSection>
                     </div>
 
                     {/* Pending Actions */}
-                    <div className="admin-card">
-                        <div className="card-header">
-                            <h3>Pending Actions</h3>
-                        </div>
+                    <DashboardSection title="Pending Actions" className="admin-card">
                         <div className="pending-actions-grid">
                             {pendingActions.map((action, index) => (
                                 <Link key={index} to={action.link} className="pending-action-card">
@@ -218,13 +200,10 @@ const AdminDashboardPage = () => {
                                 </Link>
                             ))}
                         </div>
-                    </div>
+                    </DashboardSection>
 
                     {/* Quick Actions */}
-                    <div className="admin-card">
-                        <div className="card-header">
-                            <h3>Quick Actions</h3>
-                        </div>
+                    <DashboardSection title="Quick Actions" className="admin-card">
                         <div className="quick-actions-grid">
                             <Link to="/admin/users" className="quick-action-btn">
                                 <span className="action-icon">👥</span>
@@ -251,7 +230,7 @@ const AdminDashboardPage = () => {
                                 <span>Settings</span>
                             </Link>
                         </div>
-                    </div>
+                    </DashboardSection>
                 </>
             )}
         </div>

@@ -183,7 +183,7 @@
 }
 
 /* Enhanced Dashboard Styles */
-.dashboard-header {
+.dashboard-page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;

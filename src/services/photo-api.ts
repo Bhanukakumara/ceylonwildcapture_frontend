@@ -776,3 +776,24 @@ export const publicStatsApi = {
         return response.data;
     },
 };
+// ============================================================================
+// Photographer Stats API
+// ============================================================================
+
+export interface PhotographerStats {
+    totalPhotos: number;
+    totalEarnings: number;
+    totalSales: number;
+    averageRating: number;
+}
+
+export const photographerStatsApi = {
+    /**
+     * Get statistics for a specific photographer
+     * @param userId the ID of the photographer
+     */
+    getStats: async (userId: number): Promise<PhotographerStats> => {
+        const response = await apiClient.get(`/v1/photographer/stats/${userId}`);
+        return response.data;
+    },
+};

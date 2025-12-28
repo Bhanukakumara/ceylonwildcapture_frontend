@@ -12,7 +12,6 @@ interface SidebarProps {
     isOpen: boolean;
     onToggle: () => void;
     brandName: string;
-    brandBadge?: string;
     variant?: 'default' | 'admin';
     logoLink?: string;
 }
@@ -22,7 +21,6 @@ const Sidebar = ({
     isOpen,
     onToggle,
     brandName,
-    brandBadge,
     variant = 'default',
     logoLink = '/'
 }: SidebarProps) => {
@@ -36,7 +34,6 @@ const Sidebar = ({
                 {isOpen && (
                     <div className="sidebar-brand-text">
                         <span className="sidebar-brand-name">{brandName}</span>
-                        {brandBadge && <span className="sidebar-badge">{brandBadge}</span>}
                     </div>
                 )}
             </Link>

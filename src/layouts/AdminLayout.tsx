@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { logout } from '../services/api';
+import { logout, authApi } from '../services/api';
 import Sidebar from '../components/Sidebar/Sidebar';
 import type { SidebarItem } from '../components/Sidebar/Sidebar';
 import DashboardHeader from '../components/DashboardHeader/DashboardHeader';
@@ -10,6 +10,13 @@ import './DashboardLayout.css';
 const AdminLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        setUser(currentUser);
+    }, []);
+
     const navigate = useNavigate();
 
     // Close dropdown when clicking outside
@@ -72,7 +79,6 @@ const AdminLayout = () => {
                 isOpen={sidebarOpen}
                 onToggle={() => setSidebarOpen(!sidebarOpen)}
                 brandName="Ceylon Wild"
-                brandBadge="Admin"
                 variant="admin"
             />
 
@@ -82,8 +88,8 @@ const AdminLayout = () => {
                     onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
                     notifications={5}
                     userInfo={{
-                        name: 'Admin User',
-                        role: 'Administrator'
+                        name: user ? `${user.firstName} ${user.lastName}` : 'Admin',
+                        role: user?.role || 'Administrator'
                     }}
                     variant="admin"
                     userMenuOpen={userMenuOpen}

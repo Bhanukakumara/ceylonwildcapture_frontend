@@ -519,7 +519,7 @@ export const logout = () => {
 };
 
 // Photo Module API
-export { photoApi, categoryApi, tagApi, publicStatsApi } from './photo-api';
+export { photoApi, categoryApi, tagApi, publicStatsApi, photographerStatsApi } from './photo-api';
 export type {
     Photo,
     PhotoStats,
@@ -531,7 +531,8 @@ export type {
     CategoryWithCount,
     CategoryStats,
     PublicStats,
-    TopPhotographer
+    TopPhotographer,
+    PhotographerStats
 } from './photo-api';
 
 export default apiClient;

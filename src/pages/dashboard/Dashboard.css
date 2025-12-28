@@ -6,7 +6,6 @@
 .page-subtitle {
     color: var(--color-light-gray);
     font-size: 1.1rem;
-    margin-bottom: 2rem;
 }
 
 .stats-grid {
@@ -71,14 +70,47 @@
     padding: 2rem;
     min-height: 200px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.dashboard-overview {
+    max-width: 1400px;
+    text-align: left !important;
+}
+
+.dashboard-page-header {
+    text-align: left !important;
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.dashboard-page-header h2,
+.dashboard-page-header p {
+    text-align: left !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+.dashboard-section {
+    margin-bottom: 3rem;
+    text-align: left !important;
+}
+
+.dashboard-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-white);
+    text-align: left !important;
 }
 
 .empty-state {
     color: var(--color-gray);
     font-size: 1.1rem;
-    text-align: center;
+    text-align: left !important;
 }
 
 @media (max-width: 768px) {

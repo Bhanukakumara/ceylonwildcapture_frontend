@@ -1,58 +1,84 @@
+import { useState, useEffect } from 'react';
 import '../dashboard/Dashboard.css';
+import {
+    DashboardPageHeader,
+    StatsGrid,
+    StatCard,
+    DashboardSection,
+    EmptyState
+} from '../../components/dashboard';
+import { authApi, photographerStatsApi } from '../../services/api';
+import type { PhotographerStats } from '../../services/api';
 
 const PhotographerDashboardPage = () => {
+    const [stats, setStats] = useState<PhotographerStats | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            const user = authApi.getCurrentUser();
+            if (user && user.id) {
+                try {
+                    const data = await photographerStatsApi.getStats(user.id);
+                    setStats(data);
+                } catch (error) {
+                    console.error('Failed to fetch stats:', error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(amount);
+    };
+
     return (
         <div className="dashboard-overview">
-            <h2>Photographer Dashboard</h2>
-            <p className="page-subtitle">Track your sales, uploads, and earnings</p>
+            <DashboardPageHeader
+                title="Photographer Dashboard"
+                subtitle="Track your sales, uploads, and earnings"
+            />
 
-            <div className="stats-grid">
-                <div className="stat-card glass">
-                    <div className="stat-icon">📸</div>
-                    <div className="stat-content">
-                        <div className="stat-value">156</div>
-                        <div className="stat-label">Total Photos</div>
-                    </div>
-                </div>
+            <StatsGrid>
+                <StatCard
+                    icon="📸"
+                    value={loading ? '...' : stats?.totalPhotos?.toString() || '0'}
+                    label="Total Photos"
+                />
 
-                <div className="stat-card glass">
-                    <div className="stat-icon">💰</div>
-                    <div className="stat-content">
-                        <div className="stat-value">$4,520</div>
-                        <div className="stat-label">Total Earnings</div>
-                    </div>
-                </div>
+                <StatCard
+                    icon="💰"
+                    value={loading ? '...' : formatCurrency(stats?.totalEarnings || 0)}
+                    label="Total Earnings"
+                />
 
-                <div className="stat-card glass">
-                    <div className="stat-icon">📊</div>
-                    <div className="stat-content">
-                        <div className="stat-value">342</div>
-                        <div className="stat-label">Total Sales</div>
-                    </div>
-                </div>
+                <StatCard
+                    icon="📊"
+                    value={loading ? '...' : stats?.totalSales?.toString() || '0'}
+                    label="Total Sales"
+                />
 
-                <div className="stat-card glass">
-                    <div className="stat-icon">⭐</div>
-                    <div className="stat-content">
-                        <div className="stat-value">4.8</div>
-                        <div className="stat-label">Average Rating</div>
-                    </div>
-                </div>
-            </div>
+                <StatCard
+                    icon="⭐"
+                    value={loading ? '...' : stats?.averageRating?.toFixed(1) || '0.0'}
+                    label="Average Rating"
+                />
+            </StatsGrid>
 
-            <div className="dashboard-section">
-                <h3>Recent Sales</h3>
-                <div className="recent-items">
-                    <p className="empty-state">No recent sales</p>
-                </div>
-            </div>
+            <DashboardSection title="Recent Sales">
+                <EmptyState message="No recent sales" />
+            </DashboardSection>
 
-            <div className="dashboard-section">
-                <h3>Top Performing Photos</h3>
-                <div className="recent-items">
-                    <p className="empty-state">Upload photos to see performance</p>
-                </div>
-            </div>
+            <DashboardSection title="Top Performing Photos">
+                <EmptyState message="Upload photos to see performance" />
+            </DashboardSection>
         </div>
     );
 };
