@@ -34,6 +34,31 @@
     color: #34d399;
 }
 
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: color var(--transition-fast);
+}
+
+.btn-link:hover {
+    color: var(--primary-dark);
+}
+
+.btn-link:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Disabled Button States */
 .btn:disabled {
     opacity: 0.5;

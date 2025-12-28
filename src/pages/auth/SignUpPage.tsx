@@ -23,6 +23,8 @@ const SignUpPage = () => {
         confirmPassword: ''
     });
 
+    const [isSignedUp, setIsSignedUp] = useState(false);
+    const [emailSent, setEmailSent] = useState('');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -84,6 +86,19 @@ const SignUpPage = () => {
         }
     };
 
+    const handleResendEmail = async () => {
+        if (!emailSent || isLoading) return;
+        setIsLoading(true);
+        try {
+            await authApi.resendVerificationEmail(emailSent);
+            alert('Verification email resent successfully!');
+        } catch (error) {
+            alert('Failed to resend verification email. Please try again later.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -107,17 +122,12 @@ const SignUpPage = () => {
             };
 
             // Call registration API
-            const response = await authApi.register(registerData);
+            await authApi.register(registerData);
 
-            // Registration successful - user is automatically logged in
-            console.log('Registration successful:', response);
+            // Registration successful
+            setIsSignedUp(true);
+            setEmailSent(formData.email);
 
-            // Redirect based on role
-            if (role === 'PHOTOGRAPHER') {
-                navigate('/photographer/dashboard');
-            } else {
-                navigate('/dashboard');
-            }
         } catch (error: any) {
             console.error('Registration error:', error);
             const apiErrorData = handleApiError(error);
@@ -134,6 +144,34 @@ const SignUpPage = () => {
             setIsLoading(false);
         }
     };
+
+    if (isSignedUp) {
+        return (
+            <div className="auth-form-container" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+                <div className="success-icon" style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>📧</div>
+                <h2 className="auth-form-title">Verify Your Email</h2>
+                <p className="auth-form-subtitle" style={{ maxWidth: '400px', margin: '0 auto 2rem' }}>
+                    We've sent a verification email to <strong>{emailSent}</strong>.
+                    Please check your inbox and click the link to activate your account.
+                </p>
+                <div className="auth-form-actions" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="btn btn-primary btn-full"
+                    >
+                        Go to Login
+                    </button>
+                    <button
+                        onClick={handleResendEmail}
+                        className="btn btn-link"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Resending...' : "Didn't receive an email? Resend"}
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="auth-form-container">

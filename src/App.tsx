@@ -31,6 +31,7 @@ import AboutPage from './pages/AboutPage';
 // Auth Pages
 import LoginPage from './pages/auth/LoginPage';
 import SignUpPage from './pages/auth/SignUpPage';
+import VerifyEmailPage from './pages/auth/VerifyEmailPage';
 
 // Dashboard Pages - Removed (using OrdersPage instead)
 
@@ -125,6 +126,7 @@ function App() {
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/forgot-password" element={<div className="auth-form-container"><h2 className="auth-form-title">Forgot Password</h2><p className="auth-form-subtitle">Coming Soon</p></div>} />
           </Route>
 

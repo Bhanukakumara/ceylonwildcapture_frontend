@@ -10,6 +10,8 @@ const LoginPage = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isUnverified, setIsUnverified] = useState(false);
+    const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,7 +51,10 @@ const LoginPage = () => {
             const apiError = handleApiError(err);
 
             // Handle specific error cases
-            if (apiError.status === 401) {
+            if (apiError.message?.toLowerCase().includes('not verified')) {
+                setIsUnverified(true);
+                setError(apiError.message);
+            } else if (apiError.status === 401) {
                 setError('Invalid email or password. Please try again.');
             } else if (apiError.status === 0) {
                 setError('Cannot connect to server. Please check your connection.');
@@ -61,6 +66,21 @@ const LoginPage = () => {
         }
     };
 
+    const handleResendVerification = async () => {
+        if (!email) return;
+        setResendStatus('sending');
+        try {
+            await authApi.resendVerificationEmail(email);
+            setResendStatus('sent');
+            setIsUnverified(false); // Clear the block once resent
+        } catch (err: any) {
+            console.error('Resend error:', err);
+            setResendStatus('error');
+            const apiError = handleApiError(err);
+            setError(apiError.message || 'Failed to resend verification email.');
+        }
+    };
+
     return (
         <div className="auth-form-container">
             <h2 className="auth-form-title">Welcome Back</h2>
@@ -68,8 +88,25 @@ const LoginPage = () => {
 
             {/* Error Alert */}
             {error && (
-                <div className="alert alert-error">
-                    {error}
+                <div className={`alert alert-error ${isUnverified ? 'alert-warning' : ''}`}>
+                    <p>{error}</p>
+                    {isUnverified && (
+                        <button
+                            onClick={handleResendVerification}
+                            className="btn btn-link"
+                            style={{ padding: 0, marginTop: '0.5rem', textDecoration: 'underline' }}
+                            disabled={resendStatus === 'sending'}
+                        >
+                            {resendStatus === 'sending' ? 'Sending...' : 'Resend verification email'}
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* Resend Success */}
+            {resendStatus === 'sent' && (
+                <div className="alert alert-success">
+                    Verification email resent! Please check your inbox.
                 </div>
             )}
 

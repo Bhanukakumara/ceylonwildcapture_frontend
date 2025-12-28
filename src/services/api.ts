@@ -128,36 +128,27 @@ export const authApi = {
 
     /**
      * User registration
-     * Note: This uses the /api/v1/users endpoint which may require admin auth in production
-     * For public registration, the backend should have a separate /api/auth/register endpoint
      */
-    register: async (userData: RegisterRequest): Promise<AuthResponse> => {
-        try {
-            // First, create the user account
-            const response = await apiClient.post('/v1/users', {
-                ...userData,
-                isActive: true,
-                emailVerified: false,
-            });
+    register: async (userData: RegisterRequest): Promise<void> => {
+        await apiClient.post('/v1/users', {
+            ...userData,
+            isActive: true,
+            emailVerified: false,
+        });
+    },
 
-            // After successful registration, automatically log in
-            const loginResponse = await authApi.login({
-                usernameOrEmail: userData.email,
-                password: userData.password,
-            });
+    /**
+     * Verify email with token
+     */
+    verifyEmail: async (token: string): Promise<void> => {
+        await apiClient.get(`/auth/verify-email?token=${token}`);
+    },
 
-            return loginResponse;
-        } catch (error: any) {
-            // If the endpoint requires auth, we'll need to handle it differently
-            // For now, throw a helpful error
-            if (error.response?.status === 401 || error.response?.status === 403) {
-                throw {
-                    message: 'Registration endpoint requires authentication. Please contact support.',
-                    status: error.response.status,
-                };
-            }
-            throw error;
-        }
+    /**
+     * Resend verification email
+     */
+    resendVerificationEmail: async (email: string): Promise<void> => {
+        await apiClient.post(`/auth/resend-verification?email=${email}`);
     },
 
     /**
