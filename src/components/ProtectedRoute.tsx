@@ -3,10 +3,10 @@ import type { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
     children: ReactNode;
-    requiredRole?: string;
+    requiredRole?: string | string[];
 }
 
-const ProtectedRoute = ({ children, requiredRole = 'ADMIN' }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     // Check if user is authenticated
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
 
@@ -28,7 +28,11 @@ const ProtectedRoute = ({ children, requiredRole = 'ADMIN' }: ProtectedRouteProp
             const user = JSON.parse(userStr);
             const userRole = user.role || user.userRole || localStorage.getItem('userRole');
 
-            if (userRole !== requiredRole) {
+            if (Array.isArray(requiredRole)) {
+                if (!requiredRole.includes(userRole)) {
+                    return <Navigate to="/unauthorized" replace />;
+                }
+            } else if (userRole !== requiredRole) {
                 // User doesn't have required role, redirect to unauthorized page or home
                 return <Navigate to="/unauthorized" replace />;
             }
@@ -38,7 +42,7 @@ const ProtectedRoute = ({ children, requiredRole = 'ADMIN' }: ProtectedRouteProp
         }
     }
 
-    // User is authenticated and has required role
+    // User is authenticated and has required role (if any)
     return <>{children}</>;
 };
 

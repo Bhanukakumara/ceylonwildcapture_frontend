@@ -133,7 +133,11 @@ function App() {
           {/* User Dashboard Routes - Moved to MainLayout */}
 
           {/* Photographer Dashboard Routes with DashboardLayout */}
-          <Route element={<DashboardLayout userType="photographer" />}>
+          <Route element={
+            <ProtectedRoute requiredRole="PHOTOGRAPHER">
+              <DashboardLayout userType="photographer" />
+            </ProtectedRoute>
+          }>
             <Route path="/photographer/dashboard" element={<PhotographerDashboardPage />} />
             <Route path="/photographer/upload" element={<div className="dashboard-overview"><h2>Upload Photo</h2><p className="page-subtitle">Coming Soon</p></div>} />
             <Route path="/photographer/portfolio" element={<div className="dashboard-overview"><h2>My Portfolio</h2><p className="page-subtitle">Coming Soon</p></div>} />
