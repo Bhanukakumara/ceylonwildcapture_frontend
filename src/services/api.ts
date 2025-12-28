@@ -31,14 +31,15 @@ apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        const currentPath = window.location.pathname;
 
         // If 401 and we have a refresh token, try to refresh
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
-            try {
-                const refreshToken = localStorage.getItem('refreshToken');
-                if (refreshToken) {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                try {
                     const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
                         refreshToken,
                     });
@@ -48,15 +49,32 @@ apiClient.interceptors.response.use(
 
                     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                     return apiClient(originalRequest);
+                } catch (refreshError) {
+                    // Refresh failed, clear tokens and redirect to login
+                    authApi.logout();
+                    if (currentPath !== '/login') {
+                        window.location.href = '/login';
+                    }
+                    return Promise.reject(refreshError);
                 }
-            } catch (refreshError) {
-                // Refresh failed, clear tokens and redirect to login
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
-                localStorage.removeItem('user');
-                window.location.href = '/login';
-                return Promise.reject(refreshError);
+            } else {
+                // No refresh token available, clear and redirect
+                authApi.logout();
+                if (currentPath !== '/login') {
+                    window.location.href = '/login';
+                }
+                return Promise.reject(error);
             }
+        }
+
+        // If 403 (Forbidden), redirect to login as well
+        // This handles cases where the token might be expired and results in a forbidden access
+        if (error.response?.status === 403) {
+            authApi.logout();
+            if (currentPath !== '/login') {
+                window.location.href = '/login';
+            }
+            return Promise.reject(error);
         }
 
         return Promise.reject(error);
@@ -169,7 +187,11 @@ export const authApi = {
     logout: () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
+        sessionStorage.clear();
     },
 
     /**

@@ -147,14 +147,14 @@ const SignUpPage = () => {
 
     if (isSignedUp) {
         return (
-            <div className="auth-form-container" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-                <div className="success-icon" style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>📧</div>
+            <div className="auth-form-container" style={{ textAlign: 'center', padding: '2rem 1.5rem' }}>
+                <div className="success-icon" style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
                 <h2 className="auth-form-title">Verify Your Email</h2>
-                <p className="auth-form-subtitle" style={{ maxWidth: '400px', margin: '0 auto 2rem' }}>
+                <p className="auth-form-subtitle" style={{ maxWidth: '400px', margin: '0 auto 1.5rem' }}>
                     We've sent a verification email to <strong>{emailSent}</strong>.
                     Please check your inbox and click the link to activate your account.
                 </p>
-                <div className="auth-form-actions" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="auth-form-actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <button
                         onClick={() => navigate('/login')}
                         className="btn btn-primary btn-full"
@@ -175,9 +175,9 @@ const SignUpPage = () => {
 
     return (
         <div className="auth-form-container">
-            <h2 className="auth-form-title">Create Your Account</h2>
+            <h2 className="auth-form-title">Create Account</h2>
             <p className="auth-form-subtitle">
-                {step === 1 ? 'Choose your role and enter your details' : 'Complete your registration'}
+                {step === 1 ? 'Join Ceylon Wild Capture today' : 'Secure your account'}
             </p>
 
             {/* API Error Alert */}
@@ -191,7 +191,7 @@ const SignUpPage = () => {
             <div className="signup-progress">
                 <div className={`progress-step ${step >= 1 ? 'active' : ''}`}>
                     <div className="progress-circle">1</div>
-                    <span>Account Info</span>
+                    <span>Info</span>
                 </div>
                 <div className="progress-line"></div>
                 <div className={`progress-step ${step >= 2 ? 'active' : ''}`}>
@@ -212,8 +212,8 @@ const SignUpPage = () => {
                                 onClick={() => setRole('BUYER')}
                             >
                                 <div className="role-icon">🛒</div>
-                                <div className="role-title">Buy Photos</div>
-                                <div className="role-description">Purchase wildlife photography</div>
+                                <div className="role-title">Buy</div>
+                                <div className="role-description">Purchase photos</div>
                             </button>
                             <button
                                 type="button"
@@ -221,8 +221,8 @@ const SignUpPage = () => {
                                 onClick={() => setRole('PHOTOGRAPHER')}
                             >
                                 <div className="role-icon">📸</div>
-                                <div className="role-title">Sell Photos</div>
-                                <div className="role-description">Share your wildlife photography</div>
+                                <div className="role-title">Sell</div>
+                                <div className="role-description">Share photos</div>
                             </button>
                         </div>
                     </div>
@@ -230,7 +230,7 @@ const SignUpPage = () => {
                     {/* Name Fields */}
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="firstName">First Name *</label>
+                            <label htmlFor="firstName">First Name</label>
                             <input
                                 type="text"
                                 id="firstName"
@@ -244,7 +244,7 @@ const SignUpPage = () => {
                             {errors.firstName && <span className="error-message">{errors.firstName}</span>}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="lastName">Last Name *</label>
+                            <label htmlFor="lastName">Last Name</label>
                             <input
                                 type="text"
                                 id="lastName"
@@ -261,7 +261,7 @@ const SignUpPage = () => {
 
                     {/* Username */}
                     <div className="form-group">
-                        <label htmlFor="username">Username *</label>
+                        <label htmlFor="username">Username</label>
                         <input
                             type="text"
                             id="username"
@@ -277,14 +277,14 @@ const SignUpPage = () => {
 
                     {/* Email */}
                     <div className="form-group">
-                        <label htmlFor="email">Email Address *</label>
+                        <label htmlFor="email">Email Address</label>
                         <input
                             type="email"
                             id="email"
                             name="email"
                             value={formData.email}
                             onChange={handleInputChange}
-                            placeholder="john.doe@example.com"
+                            placeholder="john@example.com"
                             className={`form-input ${errors.email ? 'error' : ''}`}
                             disabled={isLoading}
                         />
@@ -299,7 +299,7 @@ const SignUpPage = () => {
                 <form onSubmit={handleSubmit} className="auth-form">
                     {/* Phone Number */}
                     <div className="form-group">
-                        <label htmlFor="phoneNumber">Phone Number (Optional)</label>
+                        <label htmlFor="phoneNumber">Phone (Optional)</label>
                         <input
                             type="tel"
                             id="phoneNumber"
@@ -315,7 +315,7 @@ const SignUpPage = () => {
 
                     {/* Password */}
                     <div className="form-group">
-                        <label htmlFor="password">Password *</label>
+                        <label htmlFor="password">Password</label>
                         <div className="password-input-wrapper">
                             <input
                                 type={showPassword ? 'text' : 'password'}
@@ -337,14 +337,11 @@ const SignUpPage = () => {
                             </button>
                         </div>
                         {errors.password && <span className="error-message">{errors.password}</span>}
-                        <div className="password-requirements">
-                            <small>Must be at least 8 characters with uppercase, lowercase, and number</small>
-                        </div>
                     </div>
 
                     {/* Confirm Password */}
                     <div className="form-group">
-                        <label htmlFor="confirmPassword">Confirm Password *</label>
+                        <label htmlFor="confirmPassword">Confirm Password</label>
                         <div className="password-input-wrapper">
                             <input
                                 type={showConfirmPassword ? 'text' : 'password'}
@@ -372,15 +369,8 @@ const SignUpPage = () => {
                     <div className="form-group">
                         <label className="checkbox-label">
                             <input type="checkbox" required disabled={isLoading} />
-                            <span>
-                                I agree to the{' '}
-                                <Link to="/terms" className="link" target="_blank">
-                                    Terms of Service
-                                </Link>{' '}
-                                and{' '}
-                                <Link to="/privacy" className="link" target="_blank">
-                                    Privacy Policy
-                                </Link>
+                            <span style={{ fontSize: '0.75rem', marginLeft: '0.5rem' }}>
+                                I agree to the <Link to="/terms" className="link">Terms</Link> and <Link to="/privacy" className="link">Privacy</Link>
                             </span>
                         </label>
                     </div>
@@ -392,10 +382,10 @@ const SignUpPage = () => {
                             onClick={() => setStep(1)}
                             disabled={isLoading}
                         >
-                            ← Back
+                            Back
                         </button>
                         <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                            {isLoading ? 'Creating Account...' : 'Create Account'}
+                            {isLoading ? 'Creating...' : 'Sign Up'}
                         </button>
                     </div>
                 </form>
@@ -409,16 +399,13 @@ const SignUpPage = () => {
 
                     <div className="auth-social">
                         <button className="btn btn-ghost btn-full" disabled={isLoading}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10.2 0C4.7 0 .2 4.5.2 10s4.5 10 10 10 10-4.5 10-10S15.7 0 10.2 0zm4.8 7.4h-2.3c-.2 0-.4.2-.4.4v1.7h2.7l-.4 2.7h-2.3v6.7h-2.8v-6.7H7.8v-2.7h1.7V7.1c0-1.4 1-2.6 2.4-2.6h2.3v2.9z" />
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                             </svg>
-                            Sign up with Google
-                        </button>
-                        <button className="btn btn-ghost btn-full" disabled={isLoading}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 0C4.477 0 0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10c0-5.523-4.477-10-10-10z" />
-                            </svg>
-                            Sign up with Facebook
+                            Continue with Google
                         </button>
                     </div>
                 </>
@@ -431,6 +418,7 @@ const SignUpPage = () => {
                 </Link>
             </p>
         </div>
+
     );
 };
 
