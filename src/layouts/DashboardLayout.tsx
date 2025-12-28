@@ -12,7 +12,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ userType = 'buyer' }: DashboardLayoutProps) => {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 968);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
     const navigate = useNavigate();
@@ -20,6 +20,17 @@ const DashboardLayout = ({ userType = 'buyer' }: DashboardLayoutProps) => {
     useEffect(() => {
         const currentUser = authApi.getCurrentUser();
         setUser(currentUser);
+
+        const handleResize = () => {
+            if (window.innerWidth <= 968) {
+                setSidebarOpen(false);
+            } else {
+                setSidebarOpen(true);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // Close dropdown when clicking outside

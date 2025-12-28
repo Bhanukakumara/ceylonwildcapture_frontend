@@ -1,6 +1,7 @@
 /* Dashboard shared styles */
 .dashboard-overview {
     max-width: 1400px;
+    text-align: left !important;
 }
 
 .page-subtitle {
@@ -10,7 +11,7 @@
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-bottom: 3rem;
 }
@@ -54,31 +55,6 @@
     letter-spacing: 0.05em;
 }
 
-.dashboard-section {
-    margin-bottom: 3rem;
-}
-
-.dashboard-section h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    color: var(--color-white);
-}
-
-.recent-items {
-    background: var(--color-dark-tertiary);
-    border-radius: var(--radius-lg);
-    padding: 2rem;
-    min-height: 200px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-}
-
-.dashboard-overview {
-    max-width: 1400px;
-    text-align: left !important;
-}
-
 .dashboard-page-header {
     text-align: left !important;
     margin-bottom: 2.5rem;
@@ -107,15 +83,43 @@
     text-align: left !important;
 }
 
+.recent-items {
+    background: var(--color-dark-tertiary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    min-height: 200px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
 .empty-state {
     color: var(--color-gray);
     font-size: 1.1rem;
     text-align: left !important;
 }
 
+@media (max-width: 968px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+}
+
 @media (max-width: 768px) {
+    .dashboard-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
     .stats-grid {
         grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 1.5rem;
     }
 
     .stat-value {
@@ -124,5 +128,20 @@
 
     .stat-icon {
         font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-card {
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        font-size: 1.75rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
     }
 }

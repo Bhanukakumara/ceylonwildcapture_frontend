@@ -211,11 +211,15 @@
 }
 
 .stats-grid-4 {
+    display: grid;
     grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
 }
 
 .stats-grid-6 {
+    display: grid;
     grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
 }
 
 .stat-trend {
@@ -474,11 +478,32 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 968px) {
 
     .stats-grid-4,
     .stats-grid-6 {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .date-range-select {
+        width: 100%;
+    }
+
+    .stats-grid-4,
+    .stats-grid-6 {
+        grid-template-columns: 1fr;
     }
 
     .pending-actions-grid {
@@ -491,13 +516,21 @@
 }
 
 @media (max-width: 480px) {
-
-    .stats-grid-4,
-    .stats-grid-6 {
+    .quick-actions-grid {
         grid-template-columns: 1fr;
     }
 
-    .quick-actions-grid {
-        grid-template-columns: 1fr;
+    .category-performance-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .category-revenue {
+        align-self: flex-end;
+    }
+
+    .stat-card {
+        padding: 1.25rem;
     }
 }

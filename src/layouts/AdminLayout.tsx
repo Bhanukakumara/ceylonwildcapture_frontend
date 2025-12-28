@@ -8,13 +8,24 @@ import type { UserMenuItem } from '../components/DashboardHeader/DashboardHeader
 import './DashboardLayout.css';
 
 const AdminLayout = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 968);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
         const currentUser = authApi.getCurrentUser();
         setUser(currentUser);
+
+        const handleResize = () => {
+            if (window.innerWidth <= 968) {
+                setSidebarOpen(false);
+            } else {
+                setSidebarOpen(true);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const navigate = useNavigate();
