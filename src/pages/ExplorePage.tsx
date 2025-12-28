@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { photoApi, categoryApi, type Photo, type Category } from '../services/api';
+import AOS from 'aos';
 import { useCart } from '../contexts/CartContext';
 import './ExplorePage.css';
 
@@ -22,7 +23,9 @@ const ExplorePage = () => {
     const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
     const [sortBy, setSortBy] = useState<string>('newest');
     const [currentPage, setCurrentPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isAddingMore, setIsAddingMore] = useState(false);
+    const observer = useRef<IntersectionObserver | null>(null);
 
     // Cart functionality
     const { addToCart } = useCart();
@@ -49,11 +52,23 @@ const ExplorePage = () => {
     // Load photos when filters change (with debounce for search)
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            loadPhotos();
+            loadPhotos(currentPage === 0);
         }, searchQuery ? 500 : 0); // Debounce search by 500ms
 
         return () => clearTimeout(timeoutId);
     }, [selectedCategory, selectedPhotographer, priceRange, selectedOrientation, dateRange, sortBy, currentPage, searchQuery]);
+
+    // Intersection Observer for Infinite Scroll
+    const lastPhotoElementRef = useCallback((node: HTMLAnchorElement | null) => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore && !isAddingMore) {
+                setCurrentPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, hasMore, isAddingMore]);
 
     const loadCategories = async () => {
         try {
@@ -81,9 +96,13 @@ const ExplorePage = () => {
         }
     };
 
-    const loadPhotos = async () => {
+    const loadPhotos = async (isInitial: boolean = true) => {
         try {
-            setLoading(true);
+            if (isInitial) {
+                setLoading(true);
+            } else {
+                setIsAddingMore(true);
+            }
             setError(null);
 
             let response;
@@ -128,7 +147,7 @@ const ExplorePage = () => {
                 filteredPhotos = filteredPhotos.filter(p => new Date(p.createdAt) <= new Date(dateRange.end));
             }
 
-            // Client-side sorting (since we may have filtered client-side)
+            // Client-side sorting
             if (sortBy === 'popular') {
                 filteredPhotos.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
             } else if (sortBy === 'price-low') {
@@ -137,13 +156,25 @@ const ExplorePage = () => {
                 filteredPhotos.sort((a, b) => b.basePrice - a.basePrice);
             }
 
-            setPhotos(filteredPhotos);
-            setTotalPages(response.totalPages);
+            if (isInitial) {
+                setPhotos(filteredPhotos);
+            } else {
+                setPhotos(prev => [...prev, ...filteredPhotos]);
+            }
+
+            setHasMore(currentPage < response.totalPages - 1);
+
+            // Refresh AOS animations for new items
+            setTimeout(() => {
+                AOS.refresh();
+            }, 100);
+
         } catch (err) {
             console.error('Failed to load photos:', err);
             setError('Failed to load photos. Please try again later.');
         } finally {
             setLoading(false);
+            setIsAddingMore(false);
         }
     };
 
@@ -192,11 +223,6 @@ const ExplorePage = () => {
         setSearchQuery('');
         setSortBy('newest');
         setCurrentPage(0);
-    };
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleAddToCart = async (photo: Photo, e: React.MouseEvent) => {
@@ -393,11 +419,12 @@ const ExplorePage = () => {
                         <div className="explore-grid">
                             {photos.map((photo, index) => (
                                 <Link
-                                    key={photo.id}
+                                    key={`${photo.id}-${index}`}
+                                    ref={index === photos.length - 1 ? lastPhotoElementRef : null}
                                     to={`/photo/${photo.id}`}
                                     className="explore-card glass hover-lift"
                                     data-aos="fade-up"
-                                    data-aos-delay={Math.min(index * 50, 300)}
+                                    data-aos-delay={Math.min((index % 12) * 50, 300)}
                                 >
                                     <div className="explore-image-wrapper">
                                         <img
@@ -448,57 +475,16 @@ const ExplorePage = () => {
                             ))}
                         </div>
 
-                        {totalPages > 1 && (
-                            <div className="explore-pagination">
-                                <button
-                                    className="btn btn-ghost"
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 0}
-                                >
-                                    Previous
-                                </button>
-                                <div className="pagination-numbers">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        let pageNum;
-                                        if (totalPages <= 5) {
-                                            pageNum = i;
-                                        } else if (currentPage < 3) {
-                                            pageNum = i;
-                                        } else if (currentPage > totalPages - 3) {
-                                            pageNum = totalPages - 5 + i;
-                                        } else {
-                                            pageNum = currentPage - 2 + i;
-                                        }
+                        {isAddingMore && (
+                            <div className="load-more-container">
+                                <div className="loading-spinner small"></div>
+                                <p>Loading more breathtaking moments...</p>
+                            </div>
+                        )}
 
-                                        return (
-                                            <button
-                                                key={pageNum}
-                                                className={`page-btn ${currentPage === pageNum ? 'active' : ''}`}
-                                                onClick={() => handlePageChange(pageNum)}
-                                            >
-                                                {pageNum + 1}
-                                            </button>
-                                        );
-                                    })}
-                                    {totalPages > 5 && currentPage < totalPages - 3 && (
-                                        <>
-                                            <span>...</span>
-                                            <button
-                                                className="page-btn"
-                                                onClick={() => handlePageChange(totalPages - 1)}
-                                            >
-                                                {totalPages}
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                                <button
-                                    className="btn btn-ghost"
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages - 1}
-                                >
-                                    Next
-                                </button>
+                        {!hasMore && photos.length > 0 && (
+                            <div className="end-of-grid">
+                                <p>You've seen all our current captures. Check back soon for more!</p>
                             </div>
                         )}
                     </>
