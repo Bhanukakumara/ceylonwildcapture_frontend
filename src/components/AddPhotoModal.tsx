@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from 'react';
-import apiClient, { categoryApi, type Category } from '../services/api';
+import { categoryApi, type Category } from '../services/api';
 import './AddPhotoModal.css';
 
 interface AddPhotoModalProps {
