@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from 'react';
-import { categoryApi, type Category } from '../services/api';
+import apiClient, { categoryApi, type Category } from '../services/api';
 import './AddPhotoModal.css';
 
 interface AddPhotoModalProps {
@@ -153,19 +153,11 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
             });
             formData.append('data', dataBlob);
 
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:8080/api/v1/photos/upload', {
-                method: 'POST',
+            await apiClient.post('/v1/photos/upload', formData, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
+                    'Content-Type': 'multipart/form-data'
+                }
             });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
-                throw new Error(errorData.message || `Upload failed with status ${response.status}`);
-            }
 
             // Success!
             onSuccess();
