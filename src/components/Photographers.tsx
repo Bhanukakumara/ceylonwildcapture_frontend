@@ -20,7 +20,7 @@ const Photographers = () => {
         const fetchPhotographers = async () => {
             try {
                 const data = await publicStatsApi.getTopPhotographers(4);
-                setPhotographers(data);
+                setPhotographers(Array.isArray(data) ? data : []);
                 setError(null);
             } catch (err) {
                 console.error('Error fetching photographers:', err);

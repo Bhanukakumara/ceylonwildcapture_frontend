@@ -55,7 +55,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             const cartResponse: CartResponse = await cartApi.getCart();
 
             // Map backend cart items to frontend format
-            const mappedItems: CartItem[] = cartResponse.items.map((item: BackendCartItem) => ({
+            const mappedItems: CartItem[] = (cartResponse.items || []).map((item: BackendCartItem) => ({
                 id: item.id,
                 photoId: item.photoId,
                 photoTitle: item.photoTitle,
@@ -85,7 +85,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         _photoTitle: string,
         _photoImageUrl: string,
         _photographerName: string,
-        license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL'    ) => {
+        license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL') => {
         try {
             setLoading(true);
             setError(null);

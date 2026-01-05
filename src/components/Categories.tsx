@@ -43,7 +43,7 @@ const Categories = () => {
 
                 // Map backend categories to frontend format
                 // Backend returns: [[category, photoCount], ...]
-                const mappedCategories: Category[] = response.content.map((item: any, index: number) => {
+                const mappedCategories: Category[] = (response.content || []).map((item: any, index: number) => {
                     const category = item[0]; // Category object is first element
                     const photoCount = item[1]; // Photo count is second element
 

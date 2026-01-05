@@ -148,16 +148,12 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
                 captureDate: captureDate || null
             };
 
+            // Send data as a Blob with application/json content type
             const dataBlob = new Blob([JSON.stringify(photoData)], {
                 type: 'application/json'
             });
             formData.append('data', dataBlob);
 
-            await apiClient.post('/v1/photos/upload', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
 
             // Success!
             onSuccess();

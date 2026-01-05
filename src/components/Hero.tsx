@@ -18,9 +18,9 @@ const Hero = () => {
                 const data = await publicStatsApi.getStats();
 
                 setStats({
-                    photos: data.totalPhotos,
-                    photographers: data.totalPhotographers,
-                    species: data.totalCategories
+                    photos: data?.totalPhotos || 10000,
+                    photographers: data?.totalPhotographers || 500,
+                    species: data?.totalCategories || 50
                 });
             } catch (error) {
                 console.error('Failed to fetch stats:', error);

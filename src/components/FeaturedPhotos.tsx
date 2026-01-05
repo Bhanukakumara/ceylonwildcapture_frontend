@@ -13,7 +13,7 @@ const FeaturedPhotos = () => {
             try {
                 setLoading(true);
                 const response = await photoApi.getRecentlyUploaded(0, 6);
-                setPhotos(response.content);
+                setPhotos(response.content || []);
                 setError(null);
             } catch (err) {
                 console.error('Failed to fetch recent photos:', err);
