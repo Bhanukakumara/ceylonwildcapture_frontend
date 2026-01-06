@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
-import { authApi, type User } from '../services/api';
-import { useCart } from '../contexts/CartContext';
-import { Button, Text } from './ui';
+import { authApi, type User } from '../../services/api.ts';
+import { useCart } from '../../contexts/CartContext.tsx';
+import { Button, Text } from '../../components/ui';
 
 const Header = () => {
     const [scrolled, setScrolled] = useState(false);

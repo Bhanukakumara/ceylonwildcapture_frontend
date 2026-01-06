@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { publicStatsApi } from '../services/api';
-import { Title, Paragraph, Button, Input, Text } from './ui';
+import { publicStatsApi } from '../../services/api.ts';
+import { Title, Paragraph, Button, Input, Text } from '../../components/ui';
 import './Hero.css';
 
 const Hero = () => {

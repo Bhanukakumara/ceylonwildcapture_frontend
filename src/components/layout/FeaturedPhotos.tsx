@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { photoApi, type Photo } from '../services/api';
+import { photoApi, type Photo } from '../../services/api.ts';
+import { Title, Paragraph, Button, Text } from '../ui';
 import './FeaturedPhotos.css';
 
 const FeaturedPhotos = () => {
@@ -31,8 +32,12 @@ const FeaturedPhotos = () => {
             <section className="featured-photos section-sm" id="featured">
                 <div className="container">
                     <div className="section-header">
-                        <h2 className="section-title">Featured Photos</h2>
-                        <p className="section-subtitle">Loading...</p>
+                        <Title level={2} className="section-title">
+                            Featured Photos
+                        </Title>
+                        <Paragraph className="section-subtitle">
+                            Loading...
+                        </Paragraph>
                     </div>
                 </div>
             </section>
@@ -44,8 +49,12 @@ const FeaturedPhotos = () => {
             <section className="featured-photos section-sm" id="featured">
                 <div className="container">
                     <div className="section-header">
-                        <h2 className="section-title">Featured Photos</h2>
-                        <p className="section-subtitle" style={{ color: 'red' }}>{error}</p>
+                        <Title level={2} className="section-title">
+                            Featured Photos
+                        </Title>
+                        <Paragraph className="section-subtitle" style={{ color: 'red' }}>
+                            {error}
+                        </Paragraph>
                     </div>
                 </div>
             </section>
@@ -56,15 +65,19 @@ const FeaturedPhotos = () => {
         <section className="featured-photos section-sm" id="featured">
             <div className="container">
                 <div className="section-header">
-                    <h2 className="section-title">Featured Photos</h2>
-                    <p className="section-subtitle">
+                    <Title level={2} className="section-title">
+                        Featured Photos
+                    </Title>
+                    <Paragraph className="section-subtitle">
                         Discover stunning wildlife photography from Sri Lanka's most talented photographers
-                    </p>
+                    </Paragraph>
                 </div>
 
                 <div className="photos-grid">
                     {photos.length === 0 ? (
-                        <p style={{ textAlign: 'center', padding: '40px' }}>No photos available</p>
+                        <Paragraph style={{ textAlign: 'center', padding: '40px' }}>
+                            No photos available
+                        </Paragraph>
                     ) : (
                         photos.map((photo) => (
                             <Link
@@ -81,12 +94,18 @@ const FeaturedPhotos = () => {
                                     />
                                     <div className="photo-overlay">
                                         <div className="photo-actions">
-                                            <button className="btn btn-primary btn-icon" aria-label="View details">
-                                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                                    <path d="M10 3C5 3 1 10 1 10s4 7 9 7 9-7 9-7-4-7-9-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                    <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="2" />
-                                                </svg>
-                                            </button>
+                                            <Button
+                                                variant="primary"
+                                                className="btn-icon"
+                                                aria-label="View details"
+                                                icon={
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                        <path d="M10 3C5 3 1 10 1 10s4 7 9 7 9-7 9-7-4-7-9-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                        <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="2" />
+                                                    </svg>
+                                                }
+                                            >
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
@@ -94,24 +113,28 @@ const FeaturedPhotos = () => {
                                 <div className="photo-info">
                                     <div className="photo-header">
                                         <div>
-                                            <h3 className="photo-title">{photo.title}</h3>
-                                            <p className="photo-photographer">
+                                            <Title level={3} className="photo-title">
+                                                {photo.title}
+                                            </Title>
+                                            <Text as="p" className="photo-photographer" size="sm" color="muted">
                                                 by {photo.photographerName || 'Unknown'}
-                                            </p>
+                                            </Text>
                                         </div>
-                                        <div className="photo-price">
+                                        <Text as="div" className="photo-price" weight="bold" size="lg">
                                             $ {photo.basePrice?.toFixed(2)}
-                                        </div>
+                                        </Text>
                                     </div>
 
                                     <div className="photo-footer">
-                                        <span className="photo-category">
+                                        <Text as="span" className="photo-category" size="sm">
                                             {Array.isArray(photo.categories)
                                                 ? photo.categories.map(cat => cat.name).join(', ')
                                                 : photo.categories || 'Uncategorized'}
-                                        </span>
+                                        </Text>
                                         <button className="btn-link">
-                                            View Details
+                                            <Text as="span" size="sm" weight="medium">
+                                                View Details
+                                            </Text>
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                                 <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
@@ -124,11 +147,19 @@ const FeaturedPhotos = () => {
                 </div>
 
                 <div className="section-cta">
-                    <Link to="/explore" className="btn btn-secondary btn-lg">
-                        Explore All Photos
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                    <Link to="/explore">
+                        <Button
+                            variant="secondary"
+                            size="lg"
+                            icon={
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            }
+                            iconPosition="right"
+                        >
+                            Explore All Photos
+                        </Button>
                     </Link>
                 </div>
             </div>

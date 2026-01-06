@@ -8,6 +8,7 @@ interface ParagraphProps {
     color?: 'default' | 'muted' | 'light' | 'white';
     dataAos?: string;
     dataAosDelay?: string;
+    style?: React.CSSProperties;
 }
 
 const Paragraph: React.FC<ParagraphProps> = ({
@@ -16,7 +17,8 @@ const Paragraph: React.FC<ParagraphProps> = ({
     size = 'md',
     color = 'default',
     dataAos,
-    dataAosDelay
+    dataAosDelay,
+    style
 }) => {
     const combinedClassName = `
         paragraph 
@@ -30,6 +32,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
             className={combinedClassName}
             data-aos={dataAos}
             data-aos-delay={dataAosDelay}
+            style={style}
         >
             {children}
         </p>

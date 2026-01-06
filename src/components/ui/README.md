@@ -36,6 +36,7 @@ A paragraph component with size and color variants.
 - `color` ('default' | 'muted' | 'light' | 'white') - Text color, defaults to 'default'
 - `dataAos` (string) - AOS animation type
 - `dataAosDelay` (string) - AOS animation delay
+- `style` (CSSProperties) - Inline styles
 
 **Example:**
 ```tsx
@@ -43,6 +44,10 @@ import { Paragraph } from './components/ui';
 
 <Paragraph size="lg" color="light" dataAos="fade-up">
     Discover stunning wildlife photography from Sri Lanka.
+</Paragraph>
+
+<Paragraph style={{ textAlign: 'center', padding: '20px' }}>
+    Custom styled paragraph
 </Paragraph>
 ```
 
@@ -52,7 +57,7 @@ import { Paragraph } from './components/ui';
 A button component with multiple variants and sizes.
 
 **Props:**
-- `children` (ReactNode) - Button text/content
+- `children` (ReactNode, optional) - Button text/content
 - `variant` ('primary' | 'secondary' | 'ghost') - Button style, defaults to 'primary'
 - `size` ('sm' | 'md' | 'lg') - Button size, defaults to 'md'
 - `className` (string) - Additional CSS classes
@@ -74,6 +79,13 @@ import { Button } from './components/ui';
 >
     Search
 </Button>
+
+// Icon-only button
+<Button 
+    variant="primary"
+    icon={<ViewIcon />}
+    aria-label="View details"
+/>
 ```
 
 ---

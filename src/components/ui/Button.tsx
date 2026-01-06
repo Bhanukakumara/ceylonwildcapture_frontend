@@ -2,7 +2,7 @@ import React from 'react';
 import './Button.css';
 
 interface ButtonProps {
-    children: React.ReactNode;
+    children?: React.ReactNode;
     variant?: 'primary' | 'secondary' | 'ghost';
     size?: 'sm' | 'md' | 'lg';
     className?: string;
@@ -39,7 +39,7 @@ const Button: React.FC<ButtonProps> = ({
             disabled={disabled}
         >
             {icon && iconPosition === 'left' && <span className="btn-icon">{icon}</span>}
-            <span className="btn-text">{children}</span>
+            {children && <span className="btn-text">{children}</span>}
             {icon && iconPosition === 'right' && <span className="btn-icon">{icon}</span>}
         </button>
     );

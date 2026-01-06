@@ -1,29 +1,15 @@
 import { useState, useEffect } from 'react';
 import { categoryApi } from '../services/api';
+import { Title, Paragraph, Text } from './ui';
 import './Categories.css';
 
 interface Category {
     id: number;
     name: string;
     count: number;
-    icon: string;
-    color: string;
     imageUrl?: string;
+    color: string;
 }
-
-// Icon and color mapping for common wildlife categories
-const getCategoryIcon = (name: string): string => {
-    const lowerName = name.toLowerCase();
-    if (lowerName.includes('mammal') || lowerName.includes('leopard') || lowerName.includes('elephant')) return '🦁';
-    if (lowerName.includes('bird')) return '�';
-    if (lowerName.includes('reptile') || lowerName.includes('snake') || lowerName.includes('lizard')) return '🦎';
-    if (lowerName.includes('landscape') || lowerName.includes('mountain') || lowerName.includes('forest')) return '🏔️';
-    if (lowerName.includes('marine') || lowerName.includes('fish') || lowerName.includes('ocean')) return '🐠';
-    if (lowerName.includes('insect') || lowerName.includes('butterfly') || lowerName.includes('bee')) return '🦋';
-    if (lowerName.includes('amphibian') || lowerName.includes('frog')) return '🐸';
-    if (lowerName.includes('plant') || lowerName.includes('flora')) return '🌿';
-    return '📷'; // Default camera icon
-};
 
 const getCategoryColor = (index: number): string => {
     const colors = ['#ff6b35', '#4a90e2', '#2d7a52', '#8b6f47', '#00a8cc', '#f7931e'];
@@ -51,9 +37,8 @@ const Categories = () => {
                         id: category.id,
                         name: category.name,
                         count: photoCount,
-                        icon: getCategoryIcon(category.name),
-                        color: getCategoryColor(index),
-                        imageUrl: category.imageUrl // Include imageUrl from backend
+                        imageUrl: category.imageUrl,
+                        color: getCategoryColor(index)
                     };
                 });
 
@@ -74,14 +59,16 @@ const Categories = () => {
             <section className="categories section" id="categories">
                 <div className="container">
                     <div className="section-header">
-                        <h2 className="section-title" data-aos="fade-up">Explore by Category</h2>
-                        <p className="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        <Title level={2} className="section-title" dataAos="fade-up">
+                            Explore by Category
+                        </Title>
+                        <Paragraph className="section-subtitle" dataAos="fade-up" dataAosDelay="100">
                             Browse through our diverse collection of wildlife photography
-                        </p>
+                        </Paragraph>
                     </div>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading categories...</p>
+                        <Paragraph>Loading categories...</Paragraph>
                     </div>
                 </div>
             </section>
@@ -92,10 +79,12 @@ const Categories = () => {
         <section className="categories section" id="categories">
             <div className="container">
                 <div className="section-header">
-                    <h2 className="section-title" data-aos="fade-up">Explore by Category</h2>
-                    <p className="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                    <Title level={2} className="section-title" dataAos="fade-up">
+                        Explore by Category
+                    </Title>
+                    <Paragraph className="section-subtitle" dataAos="fade-up" dataAosDelay="100">
                         Browse through our diverse collection of wildlife photography
-                    </p>
+                    </Paragraph>
                 </div>
 
                 <div className="categories-grid">
@@ -107,15 +96,23 @@ const Categories = () => {
                             data-aos-delay={(index % 6) * 100}
                             style={{ '--category-color': category.color } as React.CSSProperties}
                         >
-                            {category.imageUrl ? (
+                            {category.imageUrl && (
                                 <div className="category-image-wrapper">
-                                    <img src={category.imageUrl} alt={category.name} className="category-image" />
+                                    <img
+                                        src={category.imageUrl}
+                                        alt={category.name}
+                                        className="category-image"
+                                        loading="lazy"
+                                    />
+                                    <div className="category-image-overlay"></div>
                                 </div>
-                            ) : (
-                                <div className="category-icon">{category.icon}</div>
                             )}
-                            <h3 className="category-name">{category.name}</h3>
-                            <p className="category-count">{category.count.toLocaleString()} photos</p>
+                            <Title level={3} className="category-name">
+                                {category.name}
+                            </Title>
+                            <Text as="p" className="category-count" size="sm" color="muted">
+                                {category.count.toLocaleString()} photos
+                            </Text>
                             <div className="category-arrow">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M7 17l10-10M17 7H7v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

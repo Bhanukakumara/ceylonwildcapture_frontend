@@ -1,5 +1,5 @@
-import Hero from '../../components/Hero.tsx';
-import FeaturedPhotos from '../../components/FeaturedPhotos.tsx';
+import Hero from '../../components/layout/Hero.tsx';
+import FeaturedPhotos from '../../components/layout/FeaturedPhotos.tsx';
 import Categories from '../../components/Categories.tsx';
 import Photographers from '../../components/Photographers.tsx';
 
