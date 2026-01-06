@@ -28,8 +28,6 @@ const LoginPage = () => {
                 rememberMe: rememberMe,
             });
 
-            console.log('Login successful:', response);
-
             // Redirect based on user role
             const userRole = response.user.role;
 

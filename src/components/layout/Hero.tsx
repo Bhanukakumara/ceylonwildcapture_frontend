@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { publicStatsApi } from '../../services/api.ts';
 import { Title, Paragraph, Button, Input, Text } from '../../components/ui';
+import { useDebounce } from '../../hooks/useDebounce';
 import './Hero.css';
 
 const Hero = () => {
     const [query, setQuery] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+    const debouncedQuery = useDebounce(query, 500); // Debounce for auto-redirect
     const [stats, setStats] = useState({
         photos: 0,
         photographers: 0,
@@ -31,6 +34,16 @@ const Hero = () => {
 
         fetchStats();
     }, []);
+
+    // Auto-redirect to explore page when user starts typing
+    useEffect(() => {
+        // Only redirect if:
+        // 1. User has typed something (debounced query is not empty)
+        // 2. We're not already on the explore page
+        if (debouncedQuery.trim() && location.pathname !== '/explore') {
+            navigate(`/explore?search=${encodeURIComponent(debouncedQuery.trim())}`);
+        }
+    }, [debouncedQuery, navigate, location.pathname]);
 
     const handleSearch = (e?: React.FormEvent) => {
         if (e) e.preventDefault();

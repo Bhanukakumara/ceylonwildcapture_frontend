@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { categoryApi } from '../services/api';
-import { Title, Paragraph, Text } from './ui';
+import { categoryApi } from '../../services/api.ts';
+import { Title, Paragraph, Text } from '../ui';
 import './Categories.css';
 
 interface Category {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { publicStatsApi } from '../services/api';
+import { publicStatsApi } from '../../services/api.ts';
+import { Title, Paragraph, Button, Text } from '../ui';
 import './Photographers.css';
 
 interface Photographer {
@@ -38,8 +39,12 @@ const Photographers = () => {
             <section className="photographers section-sm" id="photographers">
                 <div className="container">
                     <div className="section-header">
-                        <h2 className="section-title">Top Photographers</h2>
-                        <p className="section-subtitle">Loading...</p>
+                        <Title level={2} className="section-title">
+                            Top Photographers
+                        </Title>
+                        <Paragraph className="section-subtitle">
+                            Loading...
+                        </Paragraph>
                     </div>
                 </div>
             </section>
@@ -51,8 +56,12 @@ const Photographers = () => {
             <section className="photographers section-sm" id="photographers">
                 <div className="container">
                     <div className="section-header">
-                        <h2 className="section-title">Top Photographers</h2>
-                        <p className="section-subtitle" style={{ color: 'red' }}>{error}</p>
+                        <Title level={2} className="section-title">
+                            Top Photographers
+                        </Title>
+                        <Paragraph className="section-subtitle" style={{ color: 'red' }}>
+                            {error}
+                        </Paragraph>
                     </div>
                 </div>
             </section>
@@ -63,15 +72,19 @@ const Photographers = () => {
         <section className="photographers section-sm" id="photographers">
             <div className="container">
                 <div className="section-header">
-                    <h2 className="section-title">Top Photographers</h2>
-                    <p className="section-subtitle">
+                    <Title level={2} className="section-title">
+                        Top Photographers
+                    </Title>
+                    <Paragraph className="section-subtitle">
                         Our most active photographers with the highest contributions
-                    </p>
+                    </Paragraph>
                 </div>
 
                 <div className="photographers-grid">
                     {photographers.length === 0 ? (
-                        <p style={{ textAlign: 'center', padding: '40px' }}>No photographers found</p>
+                        <Paragraph style={{ textAlign: 'center', padding: '40px' }}>
+                            No photographers found
+                        </Paragraph>
                     ) : (
                         photographers.map((photographer) => (
                             <div key={photographer.id} className="photographer-card glass hover-lift">
@@ -98,17 +111,21 @@ const Photographers = () => {
                                 </div>
 
                                 <div className="photographer-info">
-                                    <h3 className="photographer-name">
+                                    <Title level={3} className="photographer-name">
                                         {photographer.firstName} {photographer.lastName}
-                                    </h3>
-                                    <p className="photographer-specialty">Wildlife Photography</p>
+                                    </Title>
+                                    <Text as="p" className="photographer-specialty" size="sm" color="muted">
+                                        Wildlife Photography
+                                    </Text>
                                     <div className="photographer-stats">
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <rect x="2" y="4" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
                                             <circle cx="8" cy="9" r="2" stroke="currentColor" strokeWidth="1.5" />
                                             <path d="M5 4L6 2h4l1 2" stroke="currentColor" strokeWidth="1.5" />
                                         </svg>
-                                        <span>{photographer.photoCount} photos</span>
+                                        <Text as="span" size="sm">
+                                            {photographer.photoCount} photos
+                                        </Text>
                                     </div>
                                 </div>
                             </div>
@@ -117,12 +134,17 @@ const Photographers = () => {
                 </div>
 
                 <div className="section-cta">
-                    <button className="btn btn-secondary">
+                    <Button
+                        variant="secondary"
+                        icon={
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        }
+                        iconPosition="right"
+                    >
                         View All Photographers
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </button>
+                    </Button>
                 </div>
             </div>
         </section>

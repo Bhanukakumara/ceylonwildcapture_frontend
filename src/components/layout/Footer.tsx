@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Title, Paragraph, Text } from '../ui';
 import './Footer.css';
 
 const Footer = () => {
@@ -13,11 +14,13 @@ const Footer = () => {
                                 <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
                                 <path d="M20 10 L28 20 L20 30 L12 20 Z" fill="currentColor" />
                             </svg>
-                            <span className="footer-brand-name">Ceylon Wild Capture</span>
+                            <Text as="span" className="footer-brand-name" weight="semibold">
+                                Ceylon Wild Capture
+                            </Text>
                         </div>
-                        <p className="footer-description">
+                        <Paragraph className="footer-description" size="sm" color="muted">
                             Discover and purchase stunning wildlife photography from Sri Lanka's most talented photographers.
-                        </p>
+                        </Paragraph>
                         <div className="footer-social">
                             <a href="https://www.facebook.com/share/1CyUXkctJV/" className="social-link" aria-label="Facebook">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -35,7 +38,9 @@ const Footer = () => {
 
                     {/* Quick Links */}
                     <div className="footer-section">
-                        <h4 className="footer-heading">Quick Links</h4>
+                        <Title level={4} className="footer-heading">
+                            Quick Links
+                        </Title>
                         <ul className="footer-links">
                             <li><Link to="/explore">Explore Photos</Link></li>
                             <li><a href="#categories">Categories</a></li>
@@ -46,7 +51,9 @@ const Footer = () => {
 
                     {/* Support */}
                     <div className="footer-section">
-                        <h4 className="footer-heading">Support</h4>
+                        <Title level={4} className="footer-heading">
+                            Support
+                        </Title>
                         <ul className="footer-links">
                             <li><Link to="/contact">Contact Us</Link></li>
                             <li><Link to="/faq">FAQ</Link></li>
@@ -55,7 +62,9 @@ const Footer = () => {
 
                     {/* Legal */}
                     <div className="footer-section">
-                        <h4 className="footer-heading">Legal</h4>
+                        <Title level={4} className="footer-heading">
+                            Legal
+                        </Title>
                         <ul className="footer-links">
                             <li><Link to="/terms">Terms of Service</Link></li>
                             <li><Link to="/privacy">Privacy Policy</Link></li>
@@ -66,12 +75,12 @@ const Footer = () => {
                 </div>
 
                 <div className="footer-bottom">
-                    <p className="footer-copyright">
-                        © 2024 Ceylon Wild Capture. All rights reserved.
-                    </p>
-                    <p className="footer-tagline">
+                    <Text as="p" className="footer-copyright" size="sm" color="muted">
+                        © {new Date().getFullYear()} Ceylon Wild Capture. All rights reserved.
+                    </Text>
+                    <Text as="p" className="footer-tagline" size="sm" color="muted">
                         Made by Bhanuka Kumara
-                    </p>
+                    </Text>
                 </div>
             </div>
         </footer>
@@ -79,3 +88,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

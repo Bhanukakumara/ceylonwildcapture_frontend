@@ -86,6 +86,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         _photoImageUrl: string,
         _photographerName: string,
         license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL') => {
+
+        // Check if user is authenticated before attempting to add to cart
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            const shouldLogin = window.confirm(
+                'You need to be logged in to add items to cart. Would you like to go to the login page?'
+            );
+
+            if (shouldLogin) {
+                // Save current location to redirect back after login
+                sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+                window.location.href = '/login';
+            }
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -99,9 +115,29 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             await refreshCart();
         } catch (err: any) {
             console.error('Failed to add to cart:', err);
-            const errorMessage = err.response?.data || 'Failed to add item to cart';
-            setError(errorMessage);
-            alert(errorMessage);
+
+            // Handle 403 Forbidden (user not authenticated or session expired)
+            if (err.response?.status === 403 || err.response?.status === 401) {
+                const shouldLogin = window.confirm(
+                    'Your session has expired or you are not logged in. Would you like to go to the login page?'
+                );
+
+                if (shouldLogin) {
+                    // Clear invalid token
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+
+                    // Save current location to redirect back after login
+                    sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+                    window.location.href = '/login';
+                }
+            } else {
+                // Handle other errors
+                const errorMessage = err.response?.data?.message || err.response?.data || 'Failed to add item to cart';
+                setError(errorMessage);
+                alert(errorMessage);
+            }
+
             throw err;
         } finally {
             setLoading(false);

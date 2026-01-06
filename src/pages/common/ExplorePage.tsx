@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { photoApi, categoryApi, type Photo, type Category } from '../../services/api.ts';
 import AOS from 'aos';
 import { useCart } from '../../contexts/CartContext.tsx';
+import { Title, Paragraph, Button, Text } from '../../components/ui';
+import { useDebounce } from '../../hooks/useDebounce';
 import './ExplorePage.css';
 
 const ExplorePage = () => {
@@ -16,6 +18,7 @@ const ExplorePage = () => {
 
     // Filters
     const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
+    const debouncedSearchQuery = useDebounce(searchQuery, 500); // Debounce search by 500ms
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [selectedPhotographer, setSelectedPhotographer] = useState<string>('');
     const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: '', max: '' });
@@ -26,6 +29,7 @@ const ExplorePage = () => {
     const [hasMore, setHasMore] = useState(true);
     const [isAddingMore, setIsAddingMore] = useState(false);
     const observer = useRef<IntersectionObserver | null>(null);
+    const searchInputRef = useRef<HTMLInputElement | null>(null);
 
     // Cart functionality
     const { addToCart } = useCart();
@@ -40,23 +44,25 @@ const ExplorePage = () => {
         loadPhotographers();
     }, []);
 
-    // Sync search query from URL
+    // Sync search query from URL and auto-focus if coming from Hero
     useEffect(() => {
         const queryParam = searchParams.get('search');
         if (queryParam !== null) {
             setSearchQuery(queryParam);
             setCurrentPage(0);
+
+            // Auto-focus the search input when redirected with a search query
+            // Use a small delay to ensure the input is rendered
+            setTimeout(() => {
+                searchInputRef.current?.focus();
+            }, 100);
         }
     }, [searchParams]);
 
-    // Load photos when filters change (with debounce for search)
+    // Load photos when filters change (search is debounced via useDebounce hook)
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            loadPhotos(currentPage === 0);
-        }, searchQuery ? 500 : 0); // Debounce search by 500ms
-
-        return () => clearTimeout(timeoutId);
-    }, [selectedCategory, selectedPhotographer, priceRange, selectedOrientation, dateRange, sortBy, currentPage, searchQuery]);
+        loadPhotos(currentPage === 0);
+    }, [selectedCategory, selectedPhotographer, priceRange, selectedOrientation, dateRange, sortBy, currentPage, debouncedSearchQuery]);
 
     // Intersection Observer for Infinite Scroll
     const lastPhotoElementRef = useCallback((node: HTMLAnchorElement | null) => {
@@ -108,8 +114,8 @@ const ExplorePage = () => {
             let response;
 
             // Fetch base data
-            if (searchQuery.trim()) {
-                response = await photoApi.searchPhotos(searchQuery, currentPage, pageSize);
+            if (debouncedSearchQuery.trim()) {
+                response = await photoApi.searchPhotos(debouncedSearchQuery, currentPage, pageSize);
             } else if (selectedCategory) {
                 response = await photoApi.getPhotosByCategory(selectedCategory, currentPage, pageSize);
             } else {
@@ -259,14 +265,18 @@ const ExplorePage = () => {
         <div className="explore-page">
             <div className="container">
                 <div className="explore-header">
-                    <h1 data-aos="fade-up">Explore Wildlife Photography</h1>
-                    <p data-aos="fade-up" data-aos-delay="100">Browse through our collection of stunning wildlife photos from Sri Lanka</p>
+                    <Title level={1} dataAos="fade-up">
+                        Explore Wildlife Photography
+                    </Title>
+                    <Paragraph dataAos="fade-up" dataAosDelay="100" size="lg" color="muted">
+                        Browse through our collection of stunning wildlife photos from Sri Lanka
+                    </Paragraph>
                 </div>
 
 
                 <div className="explore-filters" data-aos="fade-up" data-aos-delay="200">
                     <div className="filter-group">
-                        <label>Category</label>
+                        <Text as="label" size="sm" weight="semibold">Category</Text>
                         <select
                             className="filter-select"
                             value={selectedCategory}
@@ -282,13 +292,14 @@ const ExplorePage = () => {
                     </div>
 
                     <div className="filter-group search-group">
-                        <label>Search</label>
+                        <Text as="label" size="sm" weight="semibold">Search</Text>
                         <div className="search-input-wrapper">
                             <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
                                 <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                             </svg>
                             <input
+                                ref={searchInputRef}
                                 type="text"
                                 className="search-input"
                                 placeholder="Search by title, description, tags..."
@@ -310,7 +321,7 @@ const ExplorePage = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label>Price Range</label>
+                        <Text as="label" size="sm" weight="semibold">Price Range</Text>
                         <div className="price-inputs">
                             <input
                                 type="number"
@@ -330,7 +341,7 @@ const ExplorePage = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label>Photographer</label>
+                        <Text as="label" size="sm" weight="semibold">Photographer</Text>
                         <select
                             className="filter-select"
                             value={selectedPhotographer}
@@ -346,7 +357,7 @@ const ExplorePage = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label>Orientation</label>
+                        <Text as="label" size="sm" weight="semibold">Orientation</Text>
                         <select
                             className="filter-select"
                             value={selectedOrientation}
@@ -360,7 +371,7 @@ const ExplorePage = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label>Date Captured</label>
+                        <Text as="label" size="sm" weight="semibold">Date Captured</Text>
                         <div className="date-inputs">
                             <input
                                 type="date"
@@ -378,7 +389,7 @@ const ExplorePage = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label>Sort By</label>
+                        <Text as="label" size="sm" weight="semibold">Sort By</Text>
                         <select
                             className="filter-select"
                             value={sortBy}
@@ -392,27 +403,33 @@ const ExplorePage = () => {
                     </div>
 
                     <div className="filter-group reset-group">
-                        <button className="btn btn-ghost reset-btn" onClick={resetFilters}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ marginRight: '6px' }}>
-                                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
+                        <Button
+                            variant="ghost"
+                            className="reset-btn"
+                            onClick={resetFilters}
+                            icon={
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            }
+                        >
                             Reset All
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
                 {loading ? (
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading photos...</p>
+                        <Paragraph>Loading photos...</Paragraph>
                     </div>
                 ) : error ? (
                     <div className="error-container">
-                        <p className="error-message">{error}</p>
+                        <Text as="p" className="error-message" color="white">{error}</Text>
                     </div>
                 ) : photos.length === 0 ? (
                     <div className="empty-state">
-                        <p>No photos found</p>
+                        <Paragraph>No photos found</Paragraph>
                     </div>
                 ) : (
                     <>
@@ -435,12 +452,12 @@ const ExplorePage = () => {
                                         />
                                     </div>
                                     <div className="explore-info">
-                                        <h3>{photo.title}</h3>
-                                        <p className="explore-photographer">
+                                        <Title level={3}>{photo.title}</Title>
+                                        <Text as="p" className="explore-photographer" size="sm" color="muted">
                                             by {photo.photographer?.username || 'Unknown'}
-                                        </p>
+                                        </Text>
                                         <div className="explore-footer">
-                                            <span className="explore-price">${photo.basePrice.toFixed(2)}</span>
+                                            <Text as="span" className="explore-price" weight="bold" size="lg">${photo.basePrice.toFixed(2)}</Text>
                                             <div className="explore-actions">
                                                 <button
                                                     className={`btn btn-sm ${addedToCart[photo.id]
@@ -478,13 +495,13 @@ const ExplorePage = () => {
                         {isAddingMore && (
                             <div className="load-more-container">
                                 <div className="loading-spinner small"></div>
-                                <p>Loading more breathtaking moments...</p>
+                                <Paragraph size="sm" color="muted">Loading more breathtaking moments...</Paragraph>
                             </div>
                         )}
 
                         {!hasMore && photos.length > 0 && (
                             <div className="end-of-grid">
-                                <p>You've seen all our current captures. Check back soon for more!</p>
+                                <Paragraph color="muted">You've seen all our current captures. Check back soon for more!</Paragraph>
                             </div>
                         )}
                     </>
