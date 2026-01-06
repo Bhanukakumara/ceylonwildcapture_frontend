@@ -1,0 +1,35 @@
+.paragraph {
+    font-family: var(--font-body);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Size Variants */
+.paragraph-sm {
+    font-size: clamp(0.875rem, 1.2vw, 1rem);
+}
+
+.paragraph-md {
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+}
+
+.paragraph-lg {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+}
+
+/* Color Variants */
+.paragraph-default {
+    color: var(--text);
+}
+
+.paragraph-muted {
+    color: var(--muted);
+}
+
+.paragraph-light {
+    color: var(--color-light-gray);
+}
+
+.paragraph-white {
+    color: var(--heading);
+}

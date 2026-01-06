@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import { authApi, type User } from '../services/api';
 import { useCart } from '../contexts/CartContext';
+import { Button, Text } from './ui';
 
 const Header = () => {
     const [scrolled, setScrolled] = useState(false);
@@ -119,7 +120,9 @@ const Header = () => {
                             <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
                             <path d="M20 10 L28 20 L20 30 L12 20 Z" fill="currentColor" />
                         </svg>
-                        <span className="brand-name">Ceylon Wild Capture</span>
+                        <Text as="span" className="brand-name" weight="semibold">
+                            Ceylon Wild Capture
+                        </Text>
                     </Link>
 
                     <ul className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
@@ -172,7 +175,9 @@ const Header = () => {
                                     <circle cx="16" cy="18" r="1" fill="currentColor" />
                                 </svg>
                                 {getItemCount() > 0 && (
-                                    <span className="cart-badge">{getItemCount()}</span>
+                                    <Text as="span" className="cart-badge" size="xs" weight="bold">
+                                        {getItemCount()}
+                                    </Text>
                                 )}
                             </Link>
                         )}
@@ -201,8 +206,12 @@ const Header = () => {
                                 {profileMenuOpen && (
                                     <div className="profile-dropdown">
                                         <div className="profile-dropdown-header">
-                                            <p className="profile-name">{user?.firstName} {user?.lastName}</p>
-                                            <p className="profile-email">{user?.email}</p>
+                                            <Text as="p" className="profile-name" weight="semibold" color="white">
+                                                {user?.firstName} {user?.lastName}
+                                            </Text>
+                                            <Text as="p" className="profile-email" size="sm" color="muted">
+                                                {user?.email}
+                                            </Text>
                                         </div>
                                         <div className="profile-dropdown-divider"></div>
                                         <Link
@@ -258,21 +267,29 @@ const Header = () => {
                                             <span>Settings</span>
                                         </Link>
                                         <div className="profile-dropdown-divider"></div>
-                                        <button
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             className="profile-dropdown-item logout-btn"
                                             onClick={handleLogout}
+                                            icon={
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            }
                                         >
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                <path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
-                                            <span>Log Out</span>
-                                        </button>
+                                            Log Out
+                                        </Button>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <Link to="/login" className="btn btn-primary btn-sm">Sign In</Link>
+                            <Link to="/login">
+                                <Button variant="primary" size="sm">
+                                    Sign In
+                                </Button>
+                            </Link>
                         )}
 
                         <button
@@ -280,9 +297,18 @@ const Header = () => {
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             aria-label="Toggle menu"
                         >
-                            <span></span>
-                            <span></span>
-                            <span></span>
+                            {mobileMenuOpen ? (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            ) : (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                                </svg>
+                            )}
                         </button>
                     </div>
                 </nav>

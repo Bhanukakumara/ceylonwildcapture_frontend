@@ -1,0 +1,33 @@
+.title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: var(--spacing-md);
+    color: var(--heading);
+}
+
+.title-1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    letter-spacing: -0.02em;
+}
+
+.title-2 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: -0.01em;
+}
+
+.title-3 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.title-4 {
+    font-size: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.title-5 {
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+}
+
+.title-6 {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+}
