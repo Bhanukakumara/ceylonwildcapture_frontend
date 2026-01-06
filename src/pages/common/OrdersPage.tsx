@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { orderApi, type OrderSummaryDto, type OrderItem } from '../services/order-api';
+import { orderApi, type OrderSummaryDto, type OrderItem } from '../../services/order-api.ts';
 import './OrdersPage.css';
 
 const OrdersPage = () => {

@@ -13,20 +13,20 @@ import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 
 // Public Pages
-import HomePage from './pages/HomePage';
-import ExplorePage from './pages/ExplorePage';
-import NotFoundPage from './pages/NotFoundPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import PhotoDetailPage from './pages/PhotoDetailPage';
-import OrdersPage from './pages/OrdersPage';
-import ContactPage from './pages/ContactPage';
-import FAQPage from './pages/FAQPage';
-import TermsOfServicePage from './pages/TermsOfServicePage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import CookiePolicyPage from './pages/CookiePolicyPage';
-import CopyrightPage from './pages/CopyrightPage';
-import AboutPage from './pages/AboutPage';
+import HomePage from './pages/common/HomePage.tsx';
+import ExplorePage from './pages/common/ExplorePage.tsx';
+import NotFoundPage from './pages/common/NotFoundPage.tsx';
+import CartPage from './pages/common/CartPage.tsx';
+import CheckoutPage from './pages/common/CheckoutPage.tsx';
+import PhotoDetailPage from './pages/common/PhotoDetailPage.tsx';
+import OrdersPage from './pages/common/OrdersPage.tsx';
+import ContactPage from './pages/common/ContactPage.tsx';
+import FAQPage from './pages/common/FAQPage.tsx';
+import TermsOfServicePage from './pages/common/TermsOfServicePage.tsx';
+import PrivacyPolicyPage from './pages/common/PrivacyPolicyPage.tsx';
+import CookiePolicyPage from './pages/common/CookiePolicyPage.tsx';
+import CopyrightPage from './pages/common/CopyrightPage.tsx';
+import AboutPage from './pages/common/AboutPage.tsx';
 
 // Auth Pages
 import LoginPage from './pages/auth/LoginPage';
@@ -50,7 +50,7 @@ import ReportsPage from './pages/admin/ReportsPage';
 
 // Protected Route
 import ProtectedRoute from './components/ProtectedRoute';
-import UnauthorizedPage from './pages/UnauthorizedPage';
+import UnauthorizedPage from './pages/common/UnauthorizedPage.tsx';
 import ScrollToTop from './components/ScrollToTop';
 
 function App() {

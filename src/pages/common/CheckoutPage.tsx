@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
-import { authApi } from '../services/api';
-import { orderApi, type BillingInfo, type OrderItemRequest } from '../services/order-api';
-import { paymentApi } from '../services/payment-api';
+import { useCart } from '../../contexts/CartContext.tsx';
+import { authApi } from '../../services/api.ts';
+import { orderApi, type BillingInfo, type OrderItemRequest } from '../../services/order-api.ts';
+import { paymentApi } from '../../services/payment-api.ts';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {

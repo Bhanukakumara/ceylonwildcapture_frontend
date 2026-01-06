@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { photoApi, categoryApi, type Photo, type Category } from '../services/api';
+import { photoApi, categoryApi, type Photo, type Category } from '../../services/api.ts';
 import AOS from 'aos';
-import { useCart } from '../contexts/CartContext';
+import { useCart } from '../../contexts/CartContext.tsx';
 import './ExplorePage.css';
 
 const ExplorePage = () => {

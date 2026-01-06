@@ -100,7 +100,7 @@ const FeaturedPhotos = () => {
                                             </p>
                                         </div>
                                         <div className="photo-price">
-                                            LKR {photo.basePrice?.toFixed(2)}
+                                            $ {photo.basePrice?.toFixed(2)}
                                         </div>
                                     </div>
 

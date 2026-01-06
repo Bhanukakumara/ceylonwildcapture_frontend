@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { photoApi, type Photo } from '../services/api';
-import { useCart } from '../contexts/CartContext';
+import { photoApi, type Photo } from '../../services/api.ts';
+import { useCart } from '../../contexts/CartContext.tsx';
 import './PhotoDetailPage.css';
 
 interface LicenseOption {
