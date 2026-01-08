@@ -1,0 +1,39 @@
+.card {
+    background: var(--color-dark-tertiary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all var(--transition-normal);
+}
+
+.card-default {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-feature {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.card-highlight {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(42, 157, 143, 0.1));
+    border: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+.card-hover {
+    cursor: pointer;
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.card-feature:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.card-highlight:hover {
+    border-color: rgba(255, 107, 53, 0.5);
+}
