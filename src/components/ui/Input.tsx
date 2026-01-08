@@ -14,6 +14,14 @@ interface InputProps {
     name?: string;
     id?: string;
     showPasswordToggle?: boolean; // New prop for password toggle
+    // Additional HTML input attributes
+    step?: string | number;
+    min?: string | number;
+    max?: string | number;
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string;
+    autoComplete?: string;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -28,7 +36,14 @@ const Input: React.FC<InputProps> = ({
     required = false,
     name,
     id,
-    showPasswordToggle = false
+    showPasswordToggle = false,
+    step,
+    min,
+    max,
+    minLength,
+    maxLength,
+    pattern,
+    autoComplete
 }) => {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -65,6 +80,13 @@ const Input: React.FC<InputProps> = ({
                 required={required}
                 name={name}
                 id={id}
+                step={step}
+                min={min}
+                max={max}
+                minLength={minLength}
+                maxLength={maxLength}
+                pattern={pattern}
+                autoComplete={autoComplete}
             />
             {icon && iconPosition === 'right' && !shouldShowToggle && (
                 <span className="input-icon input-icon-right">{icon}</span>

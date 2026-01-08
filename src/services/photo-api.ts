@@ -141,6 +141,18 @@ export const photoApi = {
     },
 
     /**
+     * Upload a new photo with file and metadata
+     */
+    uploadPhoto: async (formData: FormData): Promise<Photo> => {
+        const response = await apiClient.post('/v1/photos/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+
+    /**
      * Get photo by ID
      */
     getPhotoById: async (id: number): Promise<Photo> => {
@@ -787,6 +799,67 @@ export interface PhotographerStats {
     averageRating: number;
 }
 
+export interface MonthlyEarning {
+    month: string;
+    amount: number;
+}
+
+export interface Payout {
+    id: number;
+    amount: number;
+    date: string;
+    status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+    method: string;
+}
+
+export interface EarningsData {
+    photographerId: number;
+    photographerUsername?: string;
+    totalEarnings: number;
+    pendingEarnings: number;
+    paidEarnings: number;
+    availableForWithdrawal: number;
+    completedOrdersAmount?: number;
+    refundedAmount?: number;
+    totalOrders?: number;
+    completedOrders?: number;
+    refundedOrders?: number;
+    averageOrderValue?: number;
+    lastUpdated?: string;
+    lastPayoutDate?: string;
+    monthlyEarnings: MonthlyEarning[];
+    recentPayouts: Payout[];
+}
+
+export interface PayoutRequest {
+    photographerId: number;
+    amount: number;
+    payoutMethod?: string;
+    bankAccountNumber?: string;
+    paypalEmail?: string;
+    cryptoWalletAddress?: string;
+    notes?: string;
+}
+
+export interface PayoutResponse {
+    id: number;
+    payoutReference: string;
+    photographerId: number;
+    photographerUsername?: string;
+    amount: number;
+    fee?: number;
+    netAmount?: number;
+    status: 'PENDING' | 'APPROVED' | 'PROCESSING' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
+    payoutMethod?: string;
+    requestedAt: string;
+    approvedAt?: string;
+    completedAt?: string;
+    rejectedAt?: string;
+    rejectionReason?: string;
+    notes?: string;
+    transactionId?: string;
+}
+
 export const photographerStatsApi = {
     /**
      * Get statistics for a specific photographer
@@ -794,6 +867,49 @@ export const photographerStatsApi = {
      */
     getStats: async (userId: number): Promise<PhotographerStats> => {
         const response = await apiClient.get(`/v1/photographer/stats/${userId}`);
+        return response.data;
+    },
+
+    /**
+     * Get earnings summary for a photographer
+     * @param userId the ID of the photographer
+     */
+    getEarnings: async (userId: number): Promise<EarningsData> => {
+        const response = await apiClient.get(`/v1/earnings/photographer/${userId}/summary`);
+        return response.data;
+    },
+
+    /**
+     * Request a withdrawal/payout
+     * @param amount the amount to withdraw
+     * @param photographerId optional photographer ID (if not using current user)
+     */
+    requestWithdrawal: async (amount: number, photographerId?: number): Promise<PayoutResponse> => {
+        const payoutRequest: PayoutRequest = {
+            photographerId: photographerId || 0, // Will be set by backend from auth context if 0
+            amount: amount,
+            payoutMethod: 'BANK_TRANSFER', // Default method
+        };
+        const response = await apiClient.post('/v1/payouts/requests', payoutRequest);
+        return response.data;
+    },
+
+    /**
+     * Get payout history for a photographer
+     * @param photographerId the ID of the photographer
+     * @param page page number (default 0)
+     * @param size page size (default 10)
+     */
+    getPayoutHistory: async (
+        photographerId: number,
+        page: number = 0,
+        size: number = 10
+    ): Promise<PageResponse<PayoutResponse>> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            size: size.toString(),
+        });
+        const response = await apiClient.get(`/v1/payouts/photographer/${photographerId}/history?${params.toString()}`);
         return response.data;
     },
 };

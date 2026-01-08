@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from 'react';
-import { categoryApi, type Category } from '../services/api';
+import { photoApi, categoryApi, type Category } from '../services/api';
 import './AddPhotoModal.css';
 
 interface AddPhotoModalProps {
@@ -127,16 +127,16 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
             const formData = new FormData();
             formData.append('file', file);
 
-            // Create photo data object
+            // Create photo data object matching PhotoCreateDto structure
             const photoData = {
                 title,
                 description,
                 photographerId: getCurrentUserId(),
                 categoryIds: [parseInt(categoryId)],
                 basePrice: parseFloat(basePrice),
-                commercialPrice: commercialPrice ? parseFloat(commercialPrice) : null,
-                editorialPrice: editorialPrice ? parseFloat(editorialPrice) : null,
-                extendedPrice: extendedPrice ? parseFloat(extendedPrice) : null,
+                commercialPrice: commercialPrice && parseFloat(commercialPrice) > 0 ? parseFloat(commercialPrice) : null,
+                editorialPrice: editorialPrice && parseFloat(editorialPrice) > 0 ? parseFloat(editorialPrice) : null,
+                extendedPrice: extendedPrice && parseFloat(extendedPrice) > 0 ? parseFloat(extendedPrice) : null,
                 location: location || null,
                 tagIds: [], // Tags handling would require fetching/creating tags first
                 cameraModel: cameraModel || null,
@@ -148,18 +148,26 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
                 captureDate: captureDate || null
             };
 
-            // Send data as a Blob with application/json content type
+            // Send data as a Blob with application/json content type and filename
+            // Spring Boot requires the Blob to have a filename to properly parse it as @RequestPart
             const dataBlob = new Blob([JSON.stringify(photoData)], {
                 type: 'application/json'
             });
-            formData.append('data', dataBlob);
+            formData.append('data', dataBlob, 'data.json');
 
+            console.log('Uploading photo with data:', photoData);
+
+            // Upload photo to backend
+            await photoApi.uploadPhoto(formData);
 
             // Success!
             onSuccess();
             handleClose();
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to upload photo');
+        } catch (err: any) {
+            console.error('Upload error:', err);
+            console.error('Error response:', err.response?.data);
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to upload photo';
+            setError(errorMessage);
         } finally {
             setUploading(false);
         }

@@ -560,7 +560,12 @@ export type {
     CategoryStats,
     PublicStats,
     TopPhotographer,
-    PhotographerStats
+    PhotographerStats,
+    EarningsData,
+    MonthlyEarning,
+    Payout,
+    PayoutRequest,
+    PayoutResponse
 } from './photo-api';
 
 export default apiClient;

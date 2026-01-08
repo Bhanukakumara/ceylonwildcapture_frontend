@@ -37,6 +37,10 @@ import VerifyEmailPage from './pages/auth/VerifyEmailPage';
 
 // Photographer Pages
 import PhotographerDashboardPage from './pages/photographer/PhotographerDashboardPage';
+import PhotographerUploadPage from './pages/photographer/PhotographerUploadPage';
+import PhotographerPortfolioPage from './pages/photographer/PhotographerPortfolioPage';
+import PhotographerSalesPage from './pages/photographer/PhotographerSalesPage';
+import PhotographerEarningsPage from './pages/photographer/PhotographerEarningsPage';
 
 // Admin Layout and Pages
 import AdminLayout from './layouts/AdminLayout';
@@ -139,10 +143,10 @@ function App() {
             </ProtectedRoute>
           }>
             <Route path="/photographer/dashboard" element={<PhotographerDashboardPage />} />
-            <Route path="/photographer/upload" element={<div className="dashboard-overview"><h2>Upload Photo</h2><p className="page-subtitle">Coming Soon</p></div>} />
-            <Route path="/photographer/portfolio" element={<div className="dashboard-overview"><h2>My Portfolio</h2><p className="page-subtitle">Coming Soon</p></div>} />
-            <Route path="/photographer/sales" element={<div className="dashboard-overview"><h2>Sales</h2><p className="page-subtitle">Coming Soon</p></div>} />
-            <Route path="/photographer/earnings" element={<div className="dashboard-overview"><h2>Earnings</h2><p className="page-subtitle">Coming Soon</p></div>} />
+            <Route path="/photographer/upload" element={<PhotographerUploadPage />} />
+            <Route path="/photographer/portfolio" element={<PhotographerPortfolioPage />} />
+            <Route path="/photographer/sales" element={<PhotographerSalesPage />} />
+            <Route path="/photographer/earnings" element={<PhotographerEarningsPage />} />
           </Route>
 
           {/* Admin Routes with AdminLayout - Protected */}
