@@ -58,7 +58,6 @@ const CheckoutPage = () => {
             // 1. Prepare order items
             const orderItems: OrderItemRequest[] = items.map(item => ({
                 photoId: item.photoId,
-                licenseType: item.license as any,
                 price: item.price
             }));
 
@@ -250,7 +249,7 @@ const CheckoutPage = () => {
                                         </div>
                                         <div className="summary-item-details">
                                             <h3>{item.photoTitle}</h3>
-                                            <p>{item.license} License</p>
+                                            <p>Standard License</p>
                                             <span className="summary-item-price">${item.price.toFixed(2)}</span>
                                         </div>
                                     </div>

@@ -4,8 +4,7 @@ import { photoApi, type Photo } from '../../services/api.ts';
 import { useCart } from '../../contexts/CartContext.tsx';
 import './PhotoDetailPage.css';
 
-interface LicenseOption {
-    type: 'personal' | 'commercial' | 'extended' | 'editorial';
+interface LicenseDetails {
     name: string;
     price: number;
     description: string;
@@ -21,7 +20,6 @@ const PhotoDetailPage = () => {
     const [relatedPhotos, setRelatedPhotos] = useState<Photo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedLicense, setSelectedLicense] = useState<'personal' | 'commercial' | 'extended' | 'editorial'>('personal');
     const [isZoomed, setIsZoomed] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -63,45 +61,37 @@ const PhotoDetailPage = () => {
         }
     };
 
-    // Dynamic License Options based on photo data
-    const getLicenseOptions = (): LicenseOption[] => {
-        if (!photo) return [];
-
-        const options: LicenseOption[] = [
-            {
-                type: 'personal',
-                name: 'Personal Use',
-                price: photo.basePrice,
-                description: 'For personal projects and non-commercial use',
-                features: [
-                    'High resolution download',
-                    'Personal website use',
-                    'Social media sharing',
-                    'Print for personal use',
-                    'Lifetime access',
-                ],
-            },
-        ];
-        return options;
+    // Unified License Details based on photo data
+    const getLicenseDetails = (): LicenseDetails | null => {
+        if (!photo) return null;
+        return {
+            name: 'Standard License',
+            price: photo.basePrice,
+            description: 'Full resolution access with simplified usage rights',
+            features: [
+                'High resolution download',
+                'Commercial and personal use',
+                'Social media sharing',
+                'Print for personal use',
+                'Lifetime access',
+            ],
+        };
     };
 
-    const licenseOptions = getLicenseOptions();
-    const selectedOption = licenseOptions.find(opt => opt.type === selectedLicense) || licenseOptions[0];
+    const licenseDetails = getLicenseDetails();
 
     const handleAddToCart = async () => {
         if (!photo) return;
 
         try {
-            // Convert license type to uppercase for backend
-            const backendLicenseType = selectedLicense.toUpperCase() as 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL';
+            if (!licenseDetails) return;
 
             await addToCart(
                 photo.id,
                 photo.title,
                 photo.thumbnailUrl || photo.imageUrl,
                 photo.photographer?.username || 'Unknown',
-                backendLicenseType,
-                selectedOption.price
+                photo.basePrice
             );
 
             // Show success message
@@ -178,7 +168,7 @@ const PhotoDetailPage = () => {
                                 </div>
                             )}
                         </div>
-                        
+
 
                         {/* Description */}
                         <div className="photo-description glass">
@@ -265,7 +255,7 @@ const PhotoDetailPage = () => {
                             </div>
                         </div>
                     </div>
-                    
+
 
                     {/* Sidebar */}
                     <div className="photo-sidebar">
@@ -295,25 +285,20 @@ const PhotoDetailPage = () => {
                             </Link>
                         )}
 
-                        {/* License Selection */}
                         <div className="license-section glass">
-                            <h2>Choose License</h2>
+                            <h2>License Information</h2>
                             <div className="license-options">
-                                {licenseOptions.map((option) => (
-                                    <div
-                                        key={option.type}
-                                        className={`license-option ${selectedLicense === option.type ? 'selected' : ''}`}
-                                        onClick={() => setSelectedLicense(option.type)}
-                                    >
+                                {licenseDetails && (
+                                    <div className="license-option selected">
                                         <div className="license-header">
                                             <div>
-                                                <h4>{option.name}</h4>
-                                                <p className="license-desc">{option.description}</p>
+                                                <h4>{licenseDetails.name}</h4>
+                                                <p className="license-desc">{licenseDetails.description}</p>
                                             </div>
-                                            <span className="license-price">${option.price}</span>
+                                            <span className="license-price">${licenseDetails.price}</span>
                                         </div>
                                         <ul className="license-features">
-                                            {option.features.map((feature, idx) => (
+                                            {licenseDetails.features.map((feature, idx) => (
                                                 <li key={idx}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                         <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -323,10 +308,10 @@ const PhotoDetailPage = () => {
                                             ))}
                                         </ul>
                                     </div>
-                                ))}
+                                )}
                             </div>
                             <button className="btn btn-primary add-to-cart-btn" onClick={handleAddToCart}>
-                                Add to Cart - ${selectedOption.price}
+                                Add to Cart - ${licenseDetails?.price}
                             </button>
 
                             {showSuccessMessage && (

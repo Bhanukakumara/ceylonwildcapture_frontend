@@ -86,9 +86,8 @@ const DashboardLayout = ({ userType = 'buyer' }: DashboardLayoutProps) => {
 
     const photographerMenuItems: SidebarItem[] = [
         { path: '/photographer/dashboard', label: 'Dashboard', icon: '📊' },
-        { path: '/photographer/upload', label: 'Upload Photo', icon: '📤' },
-        { path: '/photographer/portfolio', label: 'My Portfolio', icon: '🖼️' },
-        { path: '/photographer/sales', label: 'Sales', icon: '📈' },
+        { path: '/photographer/upload', label: 'Photos', icon: '📤' },
+        { path: '/photographer/sales', label: 'Orders', icon: '📈' },
         { path: '/photographer/earnings', label: 'Earnings', icon: '💰' },
     ];
 

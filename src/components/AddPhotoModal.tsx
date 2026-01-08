@@ -20,9 +20,6 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
     const [description, setDescription] = useState('');
     const [categoryId, setCategoryId] = useState<string>('');
     const [basePrice, setBasePrice] = useState('');
-    const [commercialPrice, setCommercialPrice] = useState('');
-    const [editorialPrice, setEditorialPrice] = useState('');
-    const [extendedPrice, setExtendedPrice] = useState('');
     const [location, setLocation] = useState('');
     const [tags, setTags] = useState('');
     const [cameraModel, setCameraModel] = useState('');
@@ -134,9 +131,6 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
                 photographerId: getCurrentUserId(),
                 categoryIds: [parseInt(categoryId)],
                 basePrice: parseFloat(basePrice),
-                commercialPrice: commercialPrice && parseFloat(commercialPrice) > 0 ? parseFloat(commercialPrice) : null,
-                editorialPrice: editorialPrice && parseFloat(editorialPrice) > 0 ? parseFloat(editorialPrice) : null,
-                extendedPrice: extendedPrice && parseFloat(extendedPrice) > 0 ? parseFloat(extendedPrice) : null,
                 location: location || null,
                 tagIds: [], // Tags handling would require fetching/creating tags first
                 cameraModel: cameraModel || null,
@@ -180,9 +174,6 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
         setDescription('');
         setCategoryId('');
         setBasePrice('');
-        setCommercialPrice('');
-        setEditorialPrice('');
-        setExtendedPrice('');
         setLocation('');
         setTags('');
         setCameraModel('');
@@ -312,44 +303,6 @@ const AddPhotoModal = ({ isOpen, onClose, onSuccess }: AddPhotoModalProps) => {
                                     </div>
                                 </div>
 
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label>Commercial Price ($)</label>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            className="form-input"
-                                            value={commercialPrice}
-                                            onChange={(e) => setCommercialPrice(e.target.value)}
-                                            placeholder="Optional"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Editorial Price ($)</label>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            className="form-input"
-                                            value={editorialPrice}
-                                            onChange={(e) => setEditorialPrice(e.target.value)}
-                                            placeholder="Optional"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Extended Price ($)</label>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            className="form-input"
-                                            value={extendedPrice}
-                                            onChange={(e) => setExtendedPrice(e.target.value)}
-                                            placeholder="Optional"
-                                        />
-                                    </div>
-                                </div>
 
                                 <div className="form-divider">Location & Metadata</div>
 

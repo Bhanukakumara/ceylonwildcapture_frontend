@@ -243,7 +243,6 @@ const ExplorePage = () => {
                 photo.title,
                 photo.thumbnailUrl || photo.imageUrl,
                 photo.photographer?.username || 'Unknown',
-                'PERSONAL', // Default license type
                 photo.basePrice
             );
 

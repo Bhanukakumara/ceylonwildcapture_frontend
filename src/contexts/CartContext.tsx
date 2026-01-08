@@ -8,7 +8,6 @@ export interface CartItem {
     photoTitle: string;
     photoImageUrl: string;
     photographerName: string;
-    license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL';
     price: number;
     addedAt: string;
 }
@@ -17,7 +16,7 @@ interface CartContextType {
     items: CartItem[];
     loading: boolean;
     error: string | null;
-    addToCart: (photoId: number, photoTitle: string, photoImageUrl: string, photographerName: string, license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL', price: number) => Promise<void>;
+    addToCart: (photoId: number, photoTitle: string, photoImageUrl: string, photographerName: string, price: number) => Promise<void>;
     removeFromCart: (cartItemId: number) => Promise<void>;
     clearCart: () => Promise<void>;
     getTotalPrice: () => number;
@@ -61,7 +60,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 photoTitle: item.photoTitle,
                 photoImageUrl: item.photoThumbnailUrl || item.photoImageUrl,
                 photographerName: item.photographerName,
-                license: item.licenseType,
                 price: item.price,
                 addedAt: item.addedAt,
             }));
@@ -85,7 +83,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         _photoTitle: string,
         _photoImageUrl: string,
         _photographerName: string,
-        license: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL') => {
+        _price: number) => {
 
         // Check if user is authenticated before attempting to add to cart
         const token = localStorage.getItem('accessToken');
@@ -108,7 +106,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
             await cartApi.addToCart({
                 photoId,
-                licenseType: license,
             });
 
             // Refresh cart to get updated data

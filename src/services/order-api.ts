@@ -12,7 +12,6 @@ export interface BillingInfo {
 
 export interface OrderItemRequest {
     photoId: number;
-    licenseType: 'PERSONAL' | 'COMMERCIAL' | 'EDITORIAL' | 'EXTENDED';
     price: number;
 }
 
@@ -31,7 +30,6 @@ export interface OrderItem {
     photoOriginalUrl?: string;
     photographerId: number;
     photographerName: string;
-    licenseType: string;
     price: number;
     finalPrice: number;
 }

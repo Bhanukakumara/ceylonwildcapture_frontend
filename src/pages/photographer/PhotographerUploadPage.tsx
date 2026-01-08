@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { photoApi, categoryApi, type Photo, type Category, handleApiError, authApi } from '../../services/api';
 import AddPhotoModal from '../../components/AddPhotoModal';
+import EditPhotoModal from '../../components/EditPhotoModal';
 import { Button, Title, Paragraph, Input } from '../../components/ui';
 import '../dashboard/Dashboard.css';
 import '../admin/AdminDashboard.css';
@@ -28,6 +29,8 @@ const PhotographerUploadPage = () => {
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [photoToEdit, setPhotoToEdit] = useState<Photo | null>(null);
 
     // View and pagination state
     const [currentPage, setCurrentPage] = useState(0);
@@ -141,6 +144,17 @@ const PhotographerUploadPage = () => {
             month: 'short',
             day: 'numeric'
         });
+    };
+
+    const handleEdit = (photo: Photo) => {
+        setPhotoToEdit(photo);
+        setShowEditModal(true);
+    };
+
+    const handleEditSuccess = () => {
+        setSuccessMessage('Photo updated successfully');
+        loadPhotos();
+        setTimeout(() => setSuccessMessage(null), 3000);
     };
 
     const handleViewDetails = (photo: Photo) => {
@@ -330,6 +344,14 @@ const PhotographerUploadPage = () => {
                                                     variant="ghost"
                                                     size="sm"
                                                     className="action-btn"
+                                                    onClick={() => handleEdit(photo)}
+                                                >
+                                                    ✏️
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="action-btn"
                                                     onClick={() => handleDelete(photo)}
                                                 >
                                                     🗑️
@@ -437,10 +459,7 @@ const PhotographerUploadPage = () => {
                                     <div className="detail-section">
                                         <Title level={4}>Pricing</Title>
                                         <div className="pricing-grid">
-                                            <div><strong>Base:</strong> ${selectedPhoto.basePrice}</div>
-                                            {selectedPhoto.commercialPrice && <div><strong>Commercial:</strong> ${selectedPhoto.commercialPrice}</div>}
-                                            {selectedPhoto.editorialPrice && <div><strong>Editorial:</strong> ${selectedPhoto.editorialPrice}</div>}
-                                            {selectedPhoto.extendedPrice && <div><strong>Extended:</strong> ${selectedPhoto.extendedPrice}</div>}
+                                            <div><strong>Standard Price:</strong> ${selectedPhoto.basePrice}</div>
                                         </div>
                                     </div>
 
@@ -515,6 +534,16 @@ const PhotographerUploadPage = () => {
                 onClose={() => setShowAddPhotoModal(false)}
                 onSuccess={handleUploadSuccess}
             />
+
+            {/* Edit Photo Modal */}
+            {photoToEdit && (
+                <EditPhotoModal
+                    isOpen={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    onSuccess={handleEditSuccess}
+                    photo={photoToEdit}
+                />
+            )}
         </div>
     );
 };

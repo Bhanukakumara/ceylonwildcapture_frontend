@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { photoApi, categoryApi, type Photo, type PhotoStats, type Category, handleApiError } from '../../services/api';
 import AddPhotoModal from '../../components/AddPhotoModal';
+import EditPhotoModal from '../../components/EditPhotoModal';
 import '../dashboard/Dashboard.css';
 import './AdminDashboard.css';
 import './PhotosPage.css';
@@ -32,6 +33,8 @@ const PhotosPage = () => {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showApprovalModal, setShowApprovalModal] = useState(false);
     const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [photoToEdit, setPhotoToEdit] = useState<Photo | null>(null);
     const [rejectionReason, setRejectionReason] = useState('');
 
     // View and pagination state
@@ -147,6 +150,18 @@ const PhotosPage = () => {
             setError(apiError.message);
             setTimeout(() => setError(null), 5000);
         }
+    };
+
+    const handleEdit = (photo: Photo) => {
+        setPhotoToEdit(photo);
+        setShowEditModal(true);
+    };
+
+    const handleEditSuccess = () => {
+        setSuccessMessage('Photo updated successfully');
+        loadPhotos();
+        loadStats();
+        setTimeout(() => setSuccessMessage(null), 3000);
     };
 
     const handleReject = (photo: Photo) => {
@@ -368,6 +383,13 @@ const PhotosPage = () => {
                                                 >
                                                     👁️
                                                 </button>
+                                                <button
+                                                    className="action-btn"
+                                                    title="Edit"
+                                                    onClick={() => handleEdit(photo)}
+                                                >
+                                                    ✏️
+                                                </button>
                                                 {!photo.isApproved && (
                                                     <>
                                                         <button
@@ -497,10 +519,7 @@ const PhotosPage = () => {
                                     <div className="detail-section">
                                         <h4>Pricing</h4>
                                         <div className="pricing-grid">
-                                            <div><strong>Base:</strong> ${selectedPhoto.basePrice}</div>
-                                            {selectedPhoto.commercialPrice && <div><strong>Commercial:</strong> ${selectedPhoto.commercialPrice}</div>}
-                                            {selectedPhoto.editorialPrice && <div><strong>Editorial:</strong> ${selectedPhoto.editorialPrice}</div>}
-                                            {selectedPhoto.extendedPrice && <div><strong>Extended:</strong> ${selectedPhoto.extendedPrice}</div>}
+                                            <div><strong>Standard Price:</strong> ${selectedPhoto.basePrice}</div>
                                         </div>
                                     </div>
 
@@ -631,6 +650,16 @@ const PhotosPage = () => {
                 onClose={() => setShowAddPhotoModal(false)}
                 onSuccess={handleUploadSuccess}
             />
+
+            {/* Edit Photo Modal */}
+            {photoToEdit && (
+                <EditPhotoModal
+                    isOpen={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    onSuccess={handleEditSuccess}
+                    photo={photoToEdit}
+                />
+            )}
         </div>
     );
 };

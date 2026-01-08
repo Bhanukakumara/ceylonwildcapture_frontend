@@ -8,7 +8,6 @@ export interface CartItem {
     photoThumbnailUrl: string;
     photographerName: string;
     photographerId: number;
-    licenseType: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL';
     price: number;
     addedAt: string;
 }
@@ -23,7 +22,6 @@ export interface CartResponse {
 
 export interface AddToCartRequest {
     photoId: number;
-    licenseType: 'PERSONAL' | 'COMMERCIAL' | 'EXTENDED' | 'EDITORIAL';
 }
 
 export const cartApi = {
@@ -50,17 +48,6 @@ export const cartApi = {
         await apiClient.delete(`/cart/items/${cartItemId}`);
     },
 
-    /**
-     * Update cart item license type
-     */
-    updateLicenseType: async (cartItemId: number, licenseType: string): Promise<CartItem> => {
-        const response = await apiClient.put<CartItem>(
-            `/cart/items/${cartItemId}/license`,
-            null,
-            { params: { licenseType } }
-        );
-        return response.data;
-    },
 
     /**
      * Get cart item count

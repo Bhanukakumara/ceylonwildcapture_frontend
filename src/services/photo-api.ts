@@ -25,9 +25,6 @@ export interface Photo {
     height: number;
     format: string;
     basePrice: number;
-    commercialPrice?: number;
-    editorialPrice?: number;
-    extendedPrice?: number;
     isApproved: boolean;
     isFeatured: boolean;
     isActive: boolean;
@@ -149,6 +146,30 @@ export const photoApi = {
                 'Content-Type': 'multipart/form-data',
             },
         });
+        return response.data;
+    },
+
+    /**
+     * Update an existing photo's metadata
+     */
+    updatePhoto: async (id: number, photoData: {
+        title?: string;
+        description?: string;
+        basePrice?: number;
+        location?: string;
+        categoryIds?: number[];
+        tagIds?: number[];
+        isActive?: boolean;
+        isFeatured?: boolean;
+        cameraModel?: string;
+        lens?: string;
+        focalLength?: string;
+        aperture?: string;
+        shutterSpeed?: string;
+        iso?: string;
+        captureDate?: string;
+    }): Promise<Photo> => {
+        const response = await apiClient.put(`/v1/photos/${id}`, photoData);
         return response.data;
     },
 

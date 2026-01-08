@@ -56,13 +56,6 @@ const CartPage = () => {
                                     <div className="cart-item-info">
                                         <h3>{item.photoTitle}</h3>
                                         <p className="photographer-name">by {item.photographerName}</p>
-                                        <p className="license-type">
-                                            <span className="license-badge">
-                                                {item.license === 'PERSONAL' && '📄 Personal Use'}
-                                                {item.license === 'COMMERCIAL' && '💼 Commercial Use'}
-                                                {item.license === 'EXTENDED' && '⭐ Extended License'}
-                                            </span>
-                                        </p>
                                     </div>
                                 </div>
                                 <div className="cart-item-actions">

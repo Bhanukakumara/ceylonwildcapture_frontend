@@ -38,7 +38,6 @@ import VerifyEmailPage from './pages/auth/VerifyEmailPage';
 // Photographer Pages
 import PhotographerDashboardPage from './pages/photographer/PhotographerDashboardPage';
 import PhotographerUploadPage from './pages/photographer/PhotographerUploadPage';
-import PhotographerPortfolioPage from './pages/photographer/PhotographerPortfolioPage';
 import PhotographerSalesPage from './pages/photographer/PhotographerSalesPage';
 import PhotographerEarningsPage from './pages/photographer/PhotographerEarningsPage';
 
@@ -80,7 +79,6 @@ function App() {
             {/* Photo Detail */}
             <Route path="/photo/:id" element={<PhotoDetailPage />} />
             <Route path="/category/:name" element={<div className="page-placeholder">Category Page - Coming Soon</div>} />
-            <Route path="/photographer/:id" element={<div className="page-placeholder">Photographer Profile - Coming Soon</div>} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/faq" element={<FAQPage />} />
@@ -144,7 +142,6 @@ function App() {
           }>
             <Route path="/photographer/dashboard" element={<PhotographerDashboardPage />} />
             <Route path="/photographer/upload" element={<PhotographerUploadPage />} />
-            <Route path="/photographer/portfolio" element={<PhotographerPortfolioPage />} />
             <Route path="/photographer/sales" element={<PhotographerSalesPage />} />
             <Route path="/photographer/earnings" element={<PhotographerEarningsPage />} />
           </Route>
